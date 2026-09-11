@@ -3,7 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0D2B33">
 <title>מה זה?</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700&display=swap" rel="stylesheet">
@@ -12,9 +16,13 @@
     --ink: #0D2B33;
     --ink-deep: #081E24;
     --ink-soft: #1B4652;
+    --ink-line: #2A5A67;
     --tag: #FFD23F;
     --paper: #FFFFFF;
     --mist: #CFE3E6;
+    --good: #6FD08C;
+    --muted: #5E8A95;
+    --text-scale: 1;
   }
 
   * { box-sizing: border-box; }
@@ -31,6 +39,8 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  button, input { font-family: inherit; }
+
   [hidden] { display: none !important; }
 
   #app {
@@ -39,43 +49,327 @@
     flex-direction: column;
   }
 
-  /* ---------- מסך פתיחה ---------- */
-  .start {
+  .screen {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  /* ---------- אייקונים ---------- */
+  svg.icon {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* ---------- כפתורים ---------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    border: 0;
+    border-radius: 24px;
+    font-weight: 700;
+    line-height: 1.2;
+    text-align: center;
+    cursor: pointer;
+    color: var(--ink);
+    background: var(--tag);
+    touch-action: manipulation;
+  }
+
+  .btn:active:not(:disabled) { transform: scale(0.97); }
+
+  .btn:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  .btn-huge {
+    min-height: 120px;
+    padding: 20px 28px;
+    font-size: 36px;
+    white-space: nowrap;
+  }
+
+  .btn-huge .icon { width: 56px; height: 56px; stroke-width: 2.4; }
+
+  .btn-wide {
+    width: 100%;
+    min-height: 88px;
+    padding: 14px 28px;
+    font-size: 32px;
+  }
+
+  .btn-wide .icon { width: 44px; height: 44px; stroke-width: 2.4; }
+
+  .btn-secondary {
+    color: var(--paper);
+    background: var(--ink-soft);
+  }
+
+  .btn-quiet {
+    color: var(--mist);
+    background: transparent;
+    border: 2px solid var(--ink-soft);
+  }
+
+  .btn-row {
+    width: 100%;
+    min-height: 60px;
+    padding: 12px 20px;
+    border-radius: 18px;
+    font-size: 22px;
+  }
+
+  .btn-row .icon { width: 28px; height: 28px; }
+
+  .tool-row {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .tool-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 76px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 48px;
-    padding: 24px;
-    text-align: center;
-  }
-
-  .start h1 {
-    margin: 0;
-    font-weight: 700;
-    font-size: clamp(64px, 18vw, 140px);
-    line-height: 1;
-    letter-spacing: -0.02em;
-    color: var(--tag);
-    position: relative;
-    padding: 0.12em 0.45em 0.18em 0.6em;
+    gap: 4px;
+    padding: 8px 6px;
+    border: 0;
+    border-radius: 18px;
     background: var(--ink-soft);
-    border-radius: 0.18em;
+    color: var(--paper);
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1.2;
+    cursor: pointer;
+    touch-action: manipulation;
   }
 
-  /* חור התלייה של התווית – מופיע בצד ימין בגלל RTL */
-  .start h1::before {
+  .tool-btn .icon { width: 30px; height: 30px; }
+
+  .tool-btn:disabled { opacity: 0.4; cursor: default; }
+
+  .tool-btn:active:not(:disabled) { transform: scale(0.97); }
+
+  .top-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 52px;
+    padding: 8px 16px 8px 18px;
+    border: 0;
+    border-radius: 16px;
+    background: var(--ink-soft);
+    color: var(--paper);
+    font-size: 20px;
+    font-weight: 500;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .top-btn .icon { width: 26px; height: 26px; }
+
+  .round-btn {
+    flex-shrink: 0;
+    width: 72px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 50%;
+    background: var(--tag);
+    color: var(--ink);
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .round-btn .icon { width: 38px; height: 38px; stroke-width: 2.4; }
+
+  .round-btn:disabled { opacity: 0.45; cursor: default; }
+
+  .btn:focus-visible, .tool-btn:focus-visible, .top-btn:focus-visible, .round-btn:focus-visible,
+  .overlay-btn:focus-visible, .link-btn:focus-visible, .option-btn:focus-visible, .album-card:focus-visible,
+  .choice:focus-visible, .phrase-btn:focus-visible, .segmented button:focus-visible, .toggle:focus-visible {
+    outline: 4px solid var(--paper);
+    outline-offset: 3px;
+  }
+
+  /* ---------- תווית בצורת תג תלייה ---------- */
+  .tag-word {
+    position: relative;
+    display: inline-block;
+    margin: 0;
+    padding: 0.12em 0.5em 0.16em 0.7em;
+    border-radius: 0.2em;
+    background: var(--tag);
+    color: var(--ink);
+    font-weight: 700;
+    line-height: 1.15;
+  }
+
+  .tag-word::before {
     content: "";
     position: absolute;
     top: 50%;
-    right: 0.18em;
-    width: 0.12em;
-    height: 0.12em;
+    right: 0.2em;
+    width: 0.13em;
+    height: 0.13em;
     border-radius: 50%;
     background: var(--ink);
     transform: translateY(-50%);
   }
+
+  .tag-word.is-good { background: var(--good); }
+
+  .tag-word.is-question {
+    background: var(--ink-soft);
+    color: var(--tag);
+  }
+
+  .tag-word.is-question::before { background: var(--ink); }
+
+  /* ---------- כותרת עליונה ותוכן ---------- */
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: max(12px, env(safe-area-inset-top)) 16px 12px;
+  }
+
+  .topbar h2 {
+    flex: 1;
+    margin: 0;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--tag);
+  }
+
+  .counter {
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--mist);
+    direction: ltr;
+  }
+
+  .content {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 4px 16px max(24px, env(safe-area-inset-bottom));
+  }
+
+  .content-inner {
+    max-width: 640px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .note {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.55;
+    color: var(--mist);
+  }
+
+  .note:empty { display: none; }
+
+  .note bdi {
+    display: block;
+    margin-top: 4px;
+    font-size: 16px;
+  }
+
+  .section-title {
+    margin: 12px 0 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--paper);
+  }
+
+  .feedback {
+    margin: 0;
+    min-height: 1.45em;
+    font-size: calc(22px * var(--text-scale));
+    line-height: 1.4;
+    text-align: center;
+    color: var(--mist);
+  }
+
+  .feedback.is-good {
+    color: var(--good);
+    font-weight: 700;
+  }
+
+  .feedback .heard,
+  .feedback bdi {
+    display: block;
+    margin-top: 4px;
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--mist);
+  }
+
+  /* ---------- בית ---------- */
+  .home {
+    position: relative;
+    align-items: center;
+    justify-content: center;
+    gap: 36px;
+    padding: 24px 24px 104px;
+    text-align: center;
+  }
+
+  .home h1 {
+    font-size: clamp(64px, 18vw, 140px);
+    letter-spacing: -0.02em;
+    color: var(--tag);
+    background: var(--ink-soft);
+  }
+
+  .home h1::before { background: var(--ink); }
+
+  .home-actions {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .home-actions .btn-huge { width: 100%; }
+
+  .tile-row {
+    display: flex;
+    gap: 14px;
+  }
+
+  .btn-tile {
+    flex: 1 1 0;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 132px;
+    padding: 16px;
+    font-size: 28px;
+  }
+
+  .btn-tile .icon { width: 48px; height: 48px; }
 
   .msg {
     margin: 0;
@@ -88,106 +382,36 @@
 
   .msg:empty { display: none; }
 
-  /* ---------- כפתורים ---------- */
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    border: 0;
-    border-radius: 24px;
-    font-family: inherit;
-    font-weight: 700;
-    cursor: pointer;
-    color: var(--ink);
-    background: var(--tag);
-    touch-action: manipulation;
-  }
-
-  .btn:active { transform: scale(0.97); }
-
-  .btn:disabled {
-    opacity: 0.5;
-    cursor: default;
-    transform: none;
-  }
-
-  .btn:focus-visible {
-    outline: 4px solid var(--paper);
-    outline-offset: 4px;
-  }
-
-  .btn svg {
-    flex-shrink: 0;
-    stroke: currentColor;
-    fill: none;
-    stroke-width: 2.4;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-
-  .btn-huge {
-    min-height: 120px;
-    min-width: min(360px, 100%);
-    padding: 20px 28px;
-    font-size: 36px;
-    white-space: nowrap;
-  }
-
-  .btn-huge svg { width: 56px; height: 56px; }
-
-  .btn-wide {
-    width: 100%;
-    max-width: 520px;
-    min-height: 96px;
-    padding: 16px 32px;
-    font-size: 34px;
-  }
-
-  .btn-wide svg { width: 48px; height: 48px; }
-
-  .start { position: relative; }
-
-  .settings-link {
+  .home-links {
     position: absolute;
+    right: 0;
+    left: 0;
     bottom: max(16px, env(safe-area-inset-bottom));
-    left: 50%;
-    transform: translateX(-50%);
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .link-btn {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    min-height: 48px;
+    min-height: 52px;
     padding: 8px 16px;
     border: 0;
     border-radius: 12px;
     background: transparent;
     color: var(--mist);
-    font-family: inherit;
-    font-size: 18px;
+    font-size: 19px;
     font-weight: 500;
     cursor: pointer;
     touch-action: manipulation;
   }
 
-  .settings-link svg {
-    width: 22px;
-    height: 22px;
-    stroke: currentColor;
-    fill: none;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
+  .link-btn .icon { width: 24px; height: 24px; stroke-width: 2; }
 
-  .settings-link:focus-visible {
-    outline: 3px solid var(--paper);
-    outline-offset: 2px;
-  }
-
-  /* ---------- מסך הגדרת מפתח ---------- */
+  /* ---------- מפתח Gemini ---------- */
   .setup {
-    flex: 1;
-    display: flex;
     align-items: center;
     justify-content: center;
     padding: 24px;
@@ -240,6 +464,7 @@
     font-size: 20px;
     direction: ltr;
     text-align: left;
+    -webkit-text-security: disc;
   }
 
   .key-input:focus {
@@ -267,29 +492,121 @@
 
   .setup-actions .btn-wide {
     flex: 1 1 100%;
-    max-width: none;
     min-height: 80px;
     font-size: 30px;
   }
 
-  .btn-quiet {
+  .setup-actions .btn-quiet {
     flex: 1 1 0;
     min-height: 60px;
     padding: 12px 20px;
     font-size: 22px;
-    color: var(--mist);
-    background: transparent;
-    border: 2px solid var(--ink-soft);
   }
 
-  /* ---------- מסך מצלמה ---------- */
-  .camera {
+  /* ---------- הגדרות ---------- */
+  .setting {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--ink-soft);
+  }
+
+  .setting:last-child { border-bottom: 0; }
+
+  .setting h3 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  .segmented {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 16px;
+    background: var(--ink-deep);
+  }
+
+  .segmented button {
+    flex: 1 1 0;
+    min-height: 52px;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--mist);
+    font-size: 19px;
+    font-weight: 500;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .segmented button[aria-pressed="true"] {
+    background: var(--tag);
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .toggle {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    padding: 14px 16px;
+    border: 0;
+    border-radius: 16px;
+    background: var(--ink-soft);
+    color: var(--paper);
+    text-align: right;
+    cursor: pointer;
+  }
+
+  .toggle-text {
     flex: 1;
     display: flex;
     flex-direction: column;
-    min-height: 0;
+    gap: 4px;
   }
 
+  .toggle-text b { font-size: 20px; }
+
+  .toggle-text span {
+    font-size: 16px;
+    line-height: 1.45;
+    color: var(--mist);
+  }
+
+  .toggle-track {
+    position: relative;
+    flex-shrink: 0;
+    width: 60px;
+    height: 34px;
+    border: 2px solid var(--muted);
+    border-radius: 17px;
+    background: var(--ink-deep);
+  }
+
+  .toggle-thumb {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--mist);
+  }
+
+  .toggle[aria-pressed="true"] .toggle-track {
+    border-color: var(--tag);
+    background: var(--tag);
+  }
+
+  .toggle[aria-pressed="true"] .toggle-thumb {
+    right: 29px;
+    background: var(--ink);
+  }
+
+  /* ---------- מצלמה ---------- */
   .view-wrap {
     position: relative;
     flex: 1;
@@ -312,6 +629,30 @@
 
   .view-wrap.is-frozen canvas { cursor: pointer; }
 
+  .overlay-btn {
+    position: absolute;
+    top: max(12px, env(safe-area-inset-top));
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 18px;
+    background: var(--ink);
+    color: var(--paper);
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .overlay-btn .icon { width: 32px; height: 32px; }
+
+  .overlay-btn:disabled { opacity: 0.5; }
+
+  .overlay-start { right: 12px; }
+
+  .overlay-end { left: 12px; }
+
   .status {
     position: absolute;
     top: max(16px, env(safe-area-inset-top));
@@ -320,7 +661,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    max-width: calc(100% - 32px);
+    max-width: calc(100% - 168px);
     padding: 12px 22px;
     border-radius: 999px;
     background: var(--ink);
@@ -337,64 +678,454 @@
     width: max-content;
     white-space: normal;
     border-radius: 20px;
-    font-size: 20px;
+    font-size: 19px;
     text-align: center;
   }
 
   .status:empty { display: none; }
 
-  .status svg {
+  .status .icon {
     width: 32px;
     height: 32px;
-    flex-shrink: 0;
-    stroke: var(--tag);
-    fill: none;
-    stroke-width: 2.2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
+    color: var(--tag);
   }
 
   .bar {
     display: flex;
     justify-content: center;
-    padding: 16px 16px max(16px, env(safe-area-inset-bottom));
+    padding: 12px 16px max(14px, env(safe-area-inset-bottom));
     background: var(--ink);
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .btn:active { transform: none; }
+  .bar-group {
+    width: 100%;
+    max-width: 560px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .bar .btn-wide { min-height: 84px; }
+
+  .where-question {
+    margin: 0;
+    font-size: calc(32px * var(--text-scale));
+    font-weight: 700;
+    line-height: 1.25;
+    text-align: center;
+  }
+
+  /* ---------- כרטיס מילה ---------- */
+  .sheet {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    background: rgba(8, 30, 36, 0.72);
+  }
+
+  .sheet-panel {
+    width: 100%;
+    max-width: 640px;
+    max-height: 94dvh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 14px 18px max(20px, env(safe-area-inset-bottom));
+    border-radius: 28px 28px 0 0;
+    background: var(--ink);
+  }
+
+  .sheet-head { display: flex; }
+
+  .card-image {
+    display: block;
+    width: 100%;
+    height: min(30dvh, 280px);
+    object-fit: contain;
+    border-radius: 18px;
+    background: var(--ink-deep);
+  }
+
+  .card-word-row { text-align: center; }
+
+  .card-word { font-size: calc(54px * var(--text-scale)); }
+
+  .card-syllables {
+    margin: 0;
+    min-height: 1.4em;
+    font-size: calc(28px * var(--text-scale));
+    text-align: center;
+    color: var(--mist);
+  }
+
+  .phrases {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .phrase-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 64px;
+    padding: 12px 16px;
+    border: 2px solid var(--ink-soft);
+    border-radius: 18px;
+    background: transparent;
+    color: var(--paper);
+    font-size: calc(24px * var(--text-scale));
+    font-weight: 500;
+    line-height: 1.3;
+    text-align: right;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .phrase-btn .icon { color: var(--tag); }
+
+  .phrase-btn.is-active {
+    border-color: var(--tag);
+    background: var(--ink-soft);
+  }
+
+  /* ---------- אלבום ---------- */
+  .album-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+  }
+
+  .album-card {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    border: 0;
+    border-radius: 20px;
+    overflow: hidden;
+    background: var(--ink-soft);
+    color: var(--paper);
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .album-card img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    background: var(--ink-deep);
+  }
+
+  .album-card span {
+    padding: 10px 8px 12px;
+    font-size: calc(24px * var(--text-scale));
+    font-weight: 700;
+  }
+
+  .empty {
+    margin: 32px 0;
+    font-size: 22px;
+    line-height: 1.55;
+    color: var(--mist);
+    text-align: center;
+  }
+
+  /* ---------- תרגול ---------- */
+  .option-btn {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    width: 100%;
+    min-height: 124px;
+    padding: 18px 20px;
+    border: 0;
+    border-radius: 24px;
+    background: var(--ink-soft);
+    color: var(--paper);
+    text-align: right;
+    cursor: pointer;
+  }
+
+  .option-btn .icon {
+    width: 52px;
+    height: 52px;
+    color: var(--tag);
+  }
+
+  .option-btn:disabled { opacity: 0.5; cursor: default; }
+
+  .option-text {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .option-text b { font-size: 30px; }
+
+  .option-text span {
+    font-size: 18px;
+    line-height: 1.45;
+    color: var(--mist);
+  }
+
+  .practice { gap: 14px; }
+
+  .practice-image {
+    display: block;
+    width: 100%;
+    height: min(34dvh, 320px);
+    object-fit: contain;
+    border-radius: 22px;
+    background: var(--ink-deep);
+  }
+
+  .word-slot-row {
+    min-height: calc(84px * var(--text-scale));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .word-slot { font-size: calc(56px * var(--text-scale)); }
+
+  .practice-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .mic-btn.is-listening { background: var(--good); }
+
+  .question-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .question {
+    flex: 1;
+    margin: 0;
+    font-size: calc(36px * var(--text-scale));
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .choice-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .choice {
+    aspect-ratio: 1;
+    padding: 0;
+    border: 6px solid transparent;
+    border-radius: 22px;
+    overflow: hidden;
+    background: var(--ink-deep);
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .choice img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .choice.is-correct { border-color: var(--good); }
+
+  .choice.is-wrong {
+    border-color: var(--mist);
+    opacity: 0.5;
+  }
+
+  .summary { padding-top: max(28px, env(safe-area-inset-top)); }
+
+  .summary-title {
+    margin: 0 0 8px;
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--tag);
+    text-align: center;
+  }
+
+  .summary-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .summary-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    border-radius: 18px;
+    background: var(--ink-soft);
+    font-size: 24px;
+  }
+
+  .summary-row span { flex: 1; }
+
+  .summary-row b { font-size: 36px; }
+
+  .swatch {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+  }
+
+  .c-alone { background: var(--good); }
+  .c-helped { background: var(--tag); }
+  .c-notyet { background: var(--muted); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .mic-btn.is-listening { animation: listening 1.2s ease-in-out infinite; }
+
+    @keyframes listening {
+      50% { box-shadow: 0 0 0 12px rgba(111, 208, 140, 0.25); }
+    }
+  }
+
+  /* ---------- התקדמות ---------- */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .stat {
+    padding: 14px 12px;
+    border-radius: 18px;
+    background: var(--ink-soft);
+  }
+
+  .stat i {
+    display: block;
+    width: 28px;
+    height: 6px;
+    margin-bottom: 10px;
+    border-radius: 3px;
+  }
+
+  .stat b {
+    display: block;
+    font-size: 32px;
+    line-height: 1.1;
+  }
+
+  .stat span {
+    display: block;
+    margin-top: 6px;
+    font-size: 16px;
+    line-height: 1.35;
+    color: var(--mist);
+  }
+
+  .chart svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    font-size: 16px;
+    color: var(--mist);
+  }
+
+  .legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .data-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 6px 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--ink-soft);
+  }
+
+  .data-row b { font-size: 21px; }
+
+  .data-row .rate {
+    font-size: 21px;
+    font-weight: 700;
+    text-align: left;
+  }
+
+  .data-row .detail {
+    grid-column: 1 / -1;
+    font-size: 16px;
+    line-height: 1.45;
+    color: var(--mist);
+  }
+
+  .meter {
+    grid-column: 1 / -1;
+    display: flex;
+    height: 10px;
+    border-radius: 5px;
+    overflow: hidden;
+    background: var(--ink-deep);
+  }
+
+  .meter i {
+    display: block;
+    height: 100%;
+  }
+
+  .progress-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
   }
 </style>
 </head>
 <body>
 <main id="app">
 
-  <section id="startScreen" class="start" hidden>
-    <h1>מה זה?</h1>
-    <button id="openBtn" class="btn btn-huge" type="button">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.8l1.4-2h6.6l1.4 2h1.8A2.5 2.5 0 0 1 21 8.5v9A2.5 2.5 0 0 1 18.5 20h-13A2.5 2.5 0 0 1 3 17.5z"/>
-        <circle cx="12" cy="13" r="3.8"/>
-      </svg>
-      <span>פתח מצלמה</span>
-    </button>
-    <p id="startMsg" class="msg" role="alert"></p>
-    <button id="settingsBtn" class="settings-link" type="button">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <circle cx="12" cy="12" r="3"/>
-        <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1.03H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1.1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/>
-      </svg>
-      <span>הגדרות</span>
-    </button>
+  <!-- ================= בית ================= -->
+  <section id="homeScreen" class="screen home" hidden>
+    <h1 class="tag-word">מה זה?</h1>
+    <div class="home-actions">
+      <button id="homeCameraBtn" class="btn btn-huge" type="button"><span data-icon="camera"></span><span>מצלמה</span></button>
+      <div class="tile-row">
+        <button id="homePracticeBtn" class="btn btn-secondary btn-tile" type="button"><span data-icon="practice"></span><span>תרגול</span></button>
+        <button id="homeAlbumBtn" class="btn btn-secondary btn-tile" type="button"><span data-icon="album"></span><span>אלבום</span></button>
+      </div>
+    </div>
+    <p id="homeMsg" class="msg" role="alert"></p>
+    <div class="home-links">
+      <button id="homeProgressBtn" class="link-btn" type="button"><span data-icon="progress"></span><span>התקדמות</span></button>
+      <button id="homeSettingsBtn" class="link-btn" type="button"><span data-icon="settings"></span><span>הגדרות</span></button>
+    </div>
   </section>
 
-  <section id="setupScreen" class="setup" hidden>
+  <!-- ================= מפתח Gemini ================= -->
+  <section id="setupScreen" class="screen setup" hidden>
     <div class="setup-panel">
       <h2>מפתח Gemini</h2>
       <p>כדי לזהות חפצים האפליקציה צריכה מפתח API חינמי של Google. מוציאים אותו ב-<a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener"><bdi>aistudio.google.com/apikey</bdi></a>. המפתח נשמר רק בדפדפן של המכשיר הזה.</p>
       <p id="savedKeyInfo" hidden></p>
       <label class="field-label" for="keyInput">הדביקו כאן את המפתח</label>
-      <input id="keyInput" class="key-input" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <input id="keyInput" class="key-input" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
       <p id="setupMsg" class="setup-msg" role="alert"></p>
       <div class="setup-actions">
         <button id="saveKeyBtn" class="btn btn-wide" type="button">שמור מפתח</button>
@@ -404,52 +1135,282 @@
     </div>
   </section>
 
-  <section id="cameraScreen" class="camera" hidden>
+  <!-- ================= הגדרות ================= -->
+  <section id="settingsScreen" class="screen" hidden>
+    <header class="topbar">
+      <button class="top-btn" data-nav="home" type="button"><span data-icon="back"></span><span>חזרה</span></button>
+      <h2>הגדרות</h2>
+    </header>
+    <div class="content">
+      <div class="content-inner">
+        <div class="setting">
+          <h3>קצב דיבור</h3>
+          <div class="segmented" data-setting="speechRate">
+            <button type="button" data-value="slow">איטי</button>
+            <button type="button" data-value="normal">רגיל</button>
+            <button type="button" data-value="fast">מהיר</button>
+          </div>
+          <button id="testVoiceBtn" class="btn btn-secondary btn-row" type="button"><span data-icon="speaker"></span><span>השמעת דוגמה</span></button>
+        </div>
+        <div class="setting">
+          <h3>גודל כיתוב</h3>
+          <div class="segmented" data-setting="textScale">
+            <button type="button" data-value="normal">רגיל</button>
+            <button type="button" data-value="large">גדול</button>
+            <button type="button" data-value="xlarge">גדול מאוד</button>
+          </div>
+        </div>
+        <div class="setting">
+          <h3>מצלמה</h3>
+          <button id="oneAtATimeBtn" class="toggle" type="button" aria-pressed="false">
+            <span class="toggle-text">
+              <b>חפץ אחד בכל פעם</b>
+              <span>בצילום חי מוצג רק החפץ שבמרכז המסך. בתמונה קפואה השם מופיע רק אחרי נגיעה בחפץ.</span>
+            </span>
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          </button>
+        </div>
+        <div class="setting">
+          <h3>מפתח Gemini</h3>
+          <p id="settingsKeyInfo" class="note"></p>
+          <button id="settingsKeyBtn" class="btn btn-secondary btn-row" type="button">החלפת מפתח</button>
+        </div>
+        <div class="setting">
+          <h3>התקנה ועבודה בלי אינטרנט</h3>
+          <p class="note">אפשר להוסיף את האפליקציה למסך הבית דרך תפריט הדפדפן. אחרי הפתיחה הראשונה, האלבום, התרגול והתקדמות עובדים גם בלי אינטרנט. זיהוי חפצים במצלמה וזיהוי דיבור צריכים אינטרנט.</p>
+        </div>
+        <p id="settingsMsg" class="note" role="alert"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= מצלמה ================= -->
+  <section id="cameraScreen" class="screen" hidden>
     <div id="viewWrap" class="view-wrap">
       <video id="video" playsinline muted></video>
       <canvas id="view" aria-label="תמונת המצלמה עם שמות החפצים"></canvas>
       <div id="status" class="status" aria-live="polite"></div>
+      <button id="closeCameraBtn" class="overlay-btn overlay-start" type="button" aria-label="סגירת המצלמה"><span data-icon="close"></span></button>
+      <button id="switchCameraBtn" class="overlay-btn overlay-end" type="button" aria-label="החלפת מצלמה" hidden><span data-icon="switch"></span></button>
     </div>
     <div class="bar">
-      <button id="freezeBtn" class="btn btn-wide" type="button">
-        <svg id="iconPause" viewBox="0 0 24 24" aria-hidden="true">
-          <rect x="6" y="4.5" width="4" height="15" rx="1.2"/>
-          <rect x="14" y="4.5" width="4" height="15" rx="1.2"/>
-        </svg>
-        <svg id="iconPlay" viewBox="0 0 24 24" aria-hidden="true" hidden>
-          <path d="M17.5 5.2v13.6a1 1 0 0 1-1.5.86L5.6 13.1a1.3 1.3 0 0 1 0-2.2L16 4.34a1 1 0 0 1 1.5.86z"/>
-        </svg>
-        <span id="freezeLabel">הקפא</span>
-      </button>
+      <div id="barLive" class="bar-group">
+        <button id="freezeBtn" class="btn btn-wide" type="button"><span data-icon="pause"></span><span>הקפא</span></button>
+      </div>
+      <div id="barFrozen" class="bar-group" hidden>
+        <div class="tool-row">
+          <button id="cardBtn" class="tool-btn" type="button" disabled><span data-icon="card"></span><span>כרטיס מילה</span></button>
+          <button id="whereSceneBtn" class="tool-btn" type="button" disabled><span data-icon="where"></span><span>איפה?</span></button>
+          <button id="nameSceneBtn" class="tool-btn" type="button" disabled><span data-icon="naming"></span><span>מה זה?</span></button>
+        </div>
+        <button id="continueBtn" class="btn btn-wide" type="button"><span data-icon="play"></span><span>המשך</span></button>
+      </div>
+      <div id="barWhere" class="bar-group" hidden>
+        <p id="whereQuestion" class="where-question" aria-live="polite"></p>
+        <p id="whereFeedback" class="feedback" aria-live="polite"></p>
+        <div class="tool-row">
+          <button id="whereRepeatBtn" class="tool-btn" type="button"><span data-icon="speaker"></span><span>שמע שוב</span></button>
+          <button id="whereShowBtn" class="tool-btn" type="button"><span data-icon="hint"></span><span>הראה לי</span></button>
+          <button id="whereNextBtn" class="tool-btn" type="button" hidden><span data-icon="next"></span><span>הבא</span></button>
+          <button id="whereEndBtn" class="tool-btn" type="button"><span data-icon="close"></span><span>סיום</span></button>
+        </div>
+      </div>
     </div>
   </section>
 
-</main>
+  <!-- ================= אלבום ================= -->
+  <section id="albumScreen" class="screen" hidden>
+    <header class="topbar">
+      <button class="top-btn" data-nav="home" type="button"><span data-icon="back"></span><span>חזרה</span></button>
+      <h2>אלבום</h2>
+      <span id="albumCounter" class="counter"></span>
+    </header>
+    <div class="content">
+      <div class="content-inner">
+        <p id="albumEmpty" class="empty" hidden>האלבום עדיין ריק. במצלמה מקפיאים תמונה, נוגעים בחפץ, פותחים את כרטיס המילה ולוחצים "שמירה לאלבום".</p>
+        <div id="albumGrid" class="album-grid"></div>
+        <p id="albumMsg" class="note" role="alert"></p>
+      </div>
+    </div>
+  </section>
 
+  <!-- ================= בחירת תרגול ================= -->
+  <section id="practiceScreen" class="screen" hidden>
+    <header class="topbar">
+      <button class="top-btn" data-nav="home" type="button"><span data-icon="back"></span><span>חזרה</span></button>
+      <h2>תרגול</h2>
+    </header>
+    <div class="content">
+      <div class="content-inner">
+        <button id="startNamingBtn" class="option-btn" type="button" disabled>
+          <span data-icon="naming"></span>
+          <span class="option-text"><b>מה זה?</b><span>רואים תמונה מהאלבום ומנסים להגיד את השם</span></span>
+        </button>
+        <button id="startWhereBtn" class="option-btn" type="button" disabled>
+          <span data-icon="where"></span>
+          <span class="option-text"><b>איפה?</b><span>שומעים שם של חפץ ובוחרים את התמונה הנכונה</span></span>
+        </button>
+        <p id="practiceMsg" class="note" role="alert"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= תרגול: מה זה? ================= -->
+  <section id="namingScreen" class="screen" hidden>
+    <header class="topbar">
+      <button id="namingEndBtn" class="top-btn" type="button"><span data-icon="close"></span><span>סיום</span></button>
+      <h2>מה זה?</h2>
+      <span id="namingCounter" class="counter"></span>
+    </header>
+    <div class="content">
+      <div class="content-inner practice">
+        <img id="namingImage" class="practice-image" alt="">
+        <div class="word-slot-row"><p id="namingWord" class="tag-word word-slot" aria-live="polite"></p></div>
+        <p id="namingFeedback" class="feedback" aria-live="polite"></p>
+        <div id="namingActions" class="practice-actions">
+          <button id="micBtn" class="btn btn-wide mic-btn" type="button"><span data-icon="mic"></span><span id="micLabel">אני אגיד</span></button>
+          <div class="tool-row">
+            <button id="hintBtn" class="tool-btn" type="button"><span data-icon="hint"></span><span>רמז</span></button>
+            <button id="saidRightBtn" class="tool-btn" type="button"><span data-icon="check"></span><span>אמרתי נכון</span></button>
+            <button id="skipBtn" class="tool-btn" type="button"><span data-icon="skip"></span><span>דלג</span></button>
+          </div>
+        </div>
+        <div id="namingDone" class="practice-actions" hidden>
+          <div class="tool-row">
+            <button id="namingRepeatBtn" class="tool-btn" type="button"><span data-icon="speaker"></span><span>שמע שוב</span></button>
+          </div>
+          <button id="namingNextBtn" class="btn btn-wide" type="button"><span data-icon="next"></span><span id="namingNextLabel">הבא</span></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= תרגול: איפה? ================= -->
+  <section id="whereScreen" class="screen" hidden>
+    <header class="topbar">
+      <button id="whereAlbumEndBtn" class="top-btn" type="button"><span data-icon="close"></span><span>סיום</span></button>
+      <h2>איפה?</h2>
+      <span id="whereAlbumCounter" class="counter"></span>
+    </header>
+    <div class="content">
+      <div class="content-inner practice">
+        <div class="question-row">
+          <p id="whereAlbumQuestion" class="question" aria-live="polite"></p>
+          <button id="whereAlbumRepeatBtn" class="round-btn" type="button" aria-label="שמע שוב"><span data-icon="speaker"></span></button>
+        </div>
+        <div id="choiceGrid" class="choice-grid"></div>
+        <p id="whereAlbumFeedback" class="feedback" aria-live="polite"></p>
+        <div class="tool-row">
+          <button id="whereAlbumShowBtn" class="tool-btn" type="button"><span data-icon="hint"></span><span>הראה לי</span></button>
+        </div>
+        <button id="whereAlbumNextBtn" class="btn btn-wide" type="button" hidden><span data-icon="next"></span><span id="whereAlbumNextLabel">הבא</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= סיכום תרגול ================= -->
+  <section id="summaryScreen" class="screen" hidden>
+    <div class="content">
+      <div class="content-inner summary">
+        <h2 class="summary-title">כל הכבוד על התרגול!</h2>
+        <div id="summaryStats" class="summary-stats"></div>
+        <button id="summaryAgainBtn" class="btn btn-wide" type="button"><span data-icon="practice"></span><span>עוד תרגול</span></button>
+        <button id="summaryBackBtn" class="btn btn-secondary btn-wide" type="button"><span data-icon="back"></span><span>חזרה</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= התקדמות ================= -->
+  <section id="progressScreen" class="screen" hidden>
+    <header class="topbar">
+      <button class="top-btn" data-nav="home" type="button"><span data-icon="back"></span><span>חזרה</span></button>
+      <h2>התקדמות</h2>
+    </header>
+    <div class="content">
+      <div class="content-inner">
+        <div id="rangeSelect" class="segmented">
+          <button type="button" data-value="7">7 ימים</button>
+          <button type="button" data-value="30">30 ימים</button>
+          <button type="button" data-value="all">הכול</button>
+        </div>
+        <p id="progressEmpty" class="empty" hidden>עדיין אין תרגולים בטווח הזה.</p>
+        <div id="progressBody" hidden>
+          <div id="progressStats" class="stat-grid"></div>
+          <h3 class="section-title">תרגול לפי ימים</h3>
+          <div id="progressChart" class="chart"></div>
+          <div class="legend">
+            <span><i class="swatch c-alone"></i>לבד</span>
+            <span><i class="swatch c-helped"></i>עם עזרה</span>
+            <span><i class="swatch c-notyet"></i>עדיין לא</span>
+          </div>
+          <h3 class="section-title">לפי סוג תרגול</h3>
+          <div id="progressModes"></div>
+          <h3 class="section-title">לפי מילים</h3>
+          <p class="note">המילים שהכי קשות כרגע מופיעות ראשונות.</p>
+          <div id="progressWords"></div>
+        </div>
+        <div class="progress-actions">
+          <button id="exportBtn" class="btn btn-secondary btn-row" type="button"><span data-icon="download"></span><span>ייצוא לקובץ CSV</span></button>
+          <button id="clearHistoryBtn" class="btn btn-quiet btn-row" type="button"><span data-icon="trash"></span><span id="clearHistoryLabel">מחיקת היסטוריית התרגול</span></button>
+        </div>
+        <p id="progressMsg" class="note" role="alert"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= כרטיס מילה ================= -->
+  <div id="wordSheet" class="sheet" hidden>
+    <div class="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="cardWord">
+      <div class="sheet-head">
+        <button id="cardCloseBtn" class="top-btn" type="button"><span data-icon="close"></span><span>סגירה</span></button>
+      </div>
+      <img id="cardImage" class="card-image" alt="">
+      <div class="card-word-row"><p id="cardWord" class="tag-word card-word"></p></div>
+      <p id="cardSyllables" class="card-syllables"></p>
+      <button id="cardSpeakBtn" class="btn btn-wide" type="button"><span data-icon="speaker"></span><span>שמע</span></button>
+      <h3 id="cardPhrasesTitle" class="section-title" hidden>משפטים</h3>
+      <div id="cardPhrases" class="phrases"></div>
+      <p id="cardMsg" class="feedback" role="alert"></p>
+      <button id="cardSaveBtn" class="btn btn-secondary btn-row" type="button" hidden><span data-icon="save"></span><span id="cardSaveLabel">שמירה לאלבום</span></button>
+      <button id="cardDeleteBtn" class="btn btn-quiet btn-row" type="button" hidden><span data-icon="trash"></span><span id="cardDeleteLabel">מחיקה מהאלבום</span></button>
+    </div>
+  </div>
+
+</main>
 <script>
 (() => {
   'use strict';
 
-  /* ================= הגדרות Gemini ================= */
-  // המפתח מוזן במסך ההגדרות ונשמר בדפדפן של המכשיר
+  /* ================= הגדרות ================= */
   const STORAGE_KEY = 'ma-ze.geminiApiKey';
+  const SETTINGS_KEY = 'ma-ze.settings';
+
   const GEMINI_MODEL = 'gemini-3.8-flash';
-  const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+  const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
+  const GEMINI_ENDPOINT = `${GEMINI_BASE}/${GEMINI_MODEL}:generateContent`;
 
   // המכסה לדקה של הפרויקט שלכם מופיעה ב-https://aistudio.google.com/rate-limit
   const REQUESTS_PER_MINUTE = 10;
-  // בקשות שנשמרות בכל דקה לזיהוי תמונה קפואה, כדי שלא תצטרך לחכות לתור
-  const FREEZE_RESERVE = 2;
-  const LIVE_INTERVAL_MS = 60000 / (REQUESTS_PER_MINUTE - FREEZE_RESERVE);
+  // בקשות שנשמרות בכל דקה לתמונה קפואה ולכרטיסי מילה, כדי שלא יחכו לתור של הצילום החי
+  const PRIORITY_RESERVE = 2;
+  const LIVE_INTERVAL_MS = 60000 / (REQUESTS_PER_MINUTE - PRIORITY_RESERVE);
 
   const RETRY_AFTER_ERROR_MS = 5000;
-  const CSP_TEXT = 'האתר חוסם פניות ל-Gemini. באתרי Neocities חינמיים חדשים הדפדפן לא מורשה לפנות לשרתים חיצוניים, ורק מנוי Supporter מסיר את החסימה.';
   const QUOTA_WAIT_MS = 60000;
   const MAX_UPLOAD_SIDE = 1024;
+  const ALBUM_IMAGE_SIDE = 640;
   const JPEG_QUALITY = 0.85;
-  const SPEECH_RATE = 0.85;
+  const SESSION_LENGTH = 10;
+  const BOX_ANIMATION_MS = 400;
+  const FATAL_KINDS = new Set(['key', 'config', 'csp']);
 
-  const SYSTEM_PROMPT = [
+  const SPEECH_RATES = { slow: 0.7, normal: 0.85, fast: 1 };
+  const TEXT_SCALES = { normal: 1, large: 1.25, xlarge: 1.5 };
+  const DEFAULT_SETTINGS = { speechRate: 'normal', textScale: 'normal', oneAtATime: false };
+
+  const CSP_TEXT = 'האתר חוסם פניות ל-Gemini. באתרי Neocities חינמיים חדשים הדפדפן לא מורשה לפנות לשרתים חיצוניים, ורק מנוי Supporter מסיר את החסימה.';
+
+  const DETECT_PROMPT = [
     'You are the vision engine of an assistive app for a person with aphasia whose language is Hebrew.',
     'Detect every distinct, clearly visible object in the image: people, furniture, food, dishes, tools, clothing, animals, plants, devices, vehicles, household items and anything else a person could name.',
     'Return at most 20 objects, preferring the larger and more prominent ones.',
@@ -460,9 +1421,7 @@
     'If there are no identifiable objects, return an empty array.'
   ].join('\n');
 
-  const USER_PROMPT = 'Detect the objects in this image.';
-
-  const RESPONSE_SCHEMA = {
+  const DETECT_SCHEMA = {
     type: 'ARRAY',
     items: {
       type: 'OBJECT',
@@ -475,71 +1434,228 @@
     }
   };
 
-  /* ================= עיצוב הציור ================= */
-  const COLORS = {
-    ink: '#0D2B33',
-    inkDeep: '#081E24',
-    tag: '#FFD23F',
-    paper: '#FFFFFF',
-    boxShadow: 'rgba(8, 30, 36, 0.6)',
-    selectedFill: 'rgba(255, 210, 63, 0.18)'
+  const WORD_PROMPT = [
+    'You prepare speech and language therapy material in Modern Hebrew for an adult with aphasia.',
+    'You receive one everyday Hebrew noun or short noun phrase that names an object. Return:',
+    '- niqqud: the same noun with full, correct niqqud.',
+    '- syllables: the noun split into spoken syllables with full niqqud, as one array per word, for example [["שֻׁל","חָן"]] or [["מִבְ","רֶ","שֶׁת"],["שִׁ","נַּ","יִם"]]. Joining the syllables of each word must give that word with its niqqud.',
+    '- first_sound: the first consonant of the noun together with its vowel, with niqqud, for example "שֻׁ".',
+    '- where_question: a short natural question asking where the object is, with full niqqud and correct definiteness, for example "אֵיפֹה הַמִּטָּה?" or "אֵיפֹה שֻׁלְחַן הַמַּחְשֵׁב?".',
+    '- where_question_text: the same question without niqqud, in standard full spelling (כתיב מלא), for example "איפה המיטה?".',
+    '- phrases: exactly 4 short, simple sentences in everyday spoken Hebrew that help the person communicate about this object: asking for it, asking where it is, asking someone to bring it, and saying something about it such as a problem or a need. Up to 5 words each. Avoid verb forms that depend on the speaker\'s gender; prefer forms such as "אפשר לקבל", "צריך", "תביאו לי", "איפה". For each give text without niqqud and niqqud with full niqqud.'
+  ].join('\n');
+
+  const WORD_SCHEMA = {
+    type: 'OBJECT',
+    properties: {
+      niqqud: { type: 'STRING' },
+      syllables: { type: 'ARRAY', items: { type: 'ARRAY', items: { type: 'STRING' } } },
+      first_sound: { type: 'STRING' },
+      where_question: { type: 'STRING' },
+      where_question_text: { type: 'STRING' },
+      phrases: {
+        type: 'ARRAY',
+        items: {
+          type: 'OBJECT',
+          properties: { text: { type: 'STRING' }, niqqud: { type: 'STRING' } },
+          required: ['text', 'niqqud'],
+          propertyOrdering: ['text', 'niqqud']
+        }
+      }
+    },
+    required: ['niqqud', 'syllables', 'first_sound', 'where_question', 'where_question_text', 'phrases'],
+    propertyOrdering: ['niqqud', 'syllables', 'first_sound', 'where_question', 'where_question_text', 'phrases']
   };
 
-  const ICONS = {
-    hand: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V10"/><path d="M12 10V4.5a1.5 1.5 0 0 1 3 0V10"/><path d="M15 10V6.5a1.5 1.5 0 0 1 3 0V14a7 7 0 0 1-7 7h-.6a6 6 0 0 1-4.9-2.5L3.3 15a1.5 1.5 0 0 1 2.3-1.9L9 16V11"/></svg>',
-    wait: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
-    empty: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>'
+  const OUTCOME_GROUP = {
+    independent: 'alone',
+    'first-try': 'alone',
+    cued: 'helped',
+    repeated: 'helped',
+    'after-retry': 'helped',
+    'not-yet': 'notyet',
+    shown: 'notyet'
   };
 
-  /* ================= אלמנטים ================= */
-  const startScreen = document.getElementById('startScreen');
-  const cameraScreen = document.getElementById('cameraScreen');
-  const openBtn = document.getElementById('openBtn');
-  const startMsg = document.getElementById('startMsg');
-  const settingsBtn = document.getElementById('settingsBtn');
-  const setupScreen = document.getElementById('setupScreen');
-  const savedKeyInfo = document.getElementById('savedKeyInfo');
-  const keyInput = document.getElementById('keyInput');
-  const setupMsg = document.getElementById('setupMsg');
-  const saveKeyBtn = document.getElementById('saveKeyBtn');
-  const backBtn = document.getElementById('backBtn');
-  const deleteKeyBtn = document.getElementById('deleteKeyBtn');
-  const viewWrap = document.getElementById('viewWrap');
-  const video = document.getElementById('video');
-  const view = document.getElementById('view');
-  const ctx = view.getContext('2d');
-  const statusEl = document.getElementById('status');
-  const freezeBtn = document.getElementById('freezeBtn');
-  const freezeLabel = document.getElementById('freezeLabel');
-  const iconPause = document.getElementById('iconPause');
-  const iconPlay = document.getElementById('iconPlay');
+  const OUTCOME_TEXT = {
+    independent: 'אמר/ה לבד',
+    cued: 'אמר/ה אחרי רמז',
+    repeated: 'חזר/ה אחרי ששמע/ה את המילה',
+    'not-yet': 'עדיין לא אמר/ה',
+    'first-try': 'מצא/ה בניסיון הראשון',
+    'after-retry': 'מצא/ה אחרי כמה ניסיונות',
+    shown: 'התשובה הוצגה'
+  };
 
-  const frozenCanvas = document.createElement('canvas');
-  const frozenCtx = frozenCanvas.getContext('2d');
-  const uploadCanvas = document.createElement('canvas');
-  const uploadCtx = uploadCanvas.getContext('2d');
+  const MODE_TEXT = { naming: 'מה זה? (שיום)', where: 'איפה? (הבנה)' };
+  const SOURCE_TEXT = { album: 'אלבום', camera: 'מצלמה' };
 
-  /* ================= מצב ================= */
-  let frozen = false;
-  let freezeToken = 0;
-  let liveToken = 0;
-  let liveDetections = [];
-  let hasLiveResult = false;
-  let frozenDetections = [];
-  let frozenPending = false;
-  let selectedIndex = -1;
-  let labelHits = [];
-  let mapping = { ox: 0, oy: 0, dw: 1, dh: 1 };
-  let liveLoopRunning = false;
-  let fatalError = null;
-  let transientError = null;
-  let blockedUntil = 0;
-  const requestTimes = [];
-  let hebrewVoice = null;
-  let apiKey = '';
-  let cspBlocked = false;
+  /* ================= אייקונים ================= */
+  const ICON_PATHS = {
+    camera: '<path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.8l1.4-2h6.6l1.4 2h1.8A2.5 2.5 0 0 1 21 8.5v9A2.5 2.5 0 0 1 18.5 20h-13A2.5 2.5 0 0 1 3 17.5z"/><circle cx="12" cy="13" r="3.8"/>',
+    practice: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/>',
+    album: '<rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8.5 9"/>',
+    progress: '<path d="M4 20V11"/><path d="M10 20V5"/><path d="M16 20v-6"/><path d="M21 20H3"/>',
+    settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1.03H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1.1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/>',
+    close: '<path d="M6 6l12 12M18 6L6 18"/>',
+    back: '<path d="M9 5l7 7-7 7"/>',
+    next: '<path d="M15 5l-7 7 7 7"/>',
+    skip: '<path d="M12 5l-7 7 7 7"/><path d="M19 5l-7 7 7 7"/>',
+    switch: '<path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 20v-4h-4"/>',
+    pause: '<rect x="6" y="4.5" width="4" height="15" rx="1.2"/><rect x="14" y="4.5" width="4" height="15" rx="1.2"/>',
+    play: '<path d="M17.5 5.2v13.6a1 1 0 0 1-1.5.86L5.6 13.1a1.3 1.3 0 0 1 0-2.2L16 4.34a1 1 0 0 1 1.5.86z"/>',
+    speaker: '<path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/>',
+    mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/>',
+    hint: '<path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>',
+    check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+    card: '<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M7 10h10"/><path d="M7 14h6"/>',
+    where: '<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/>',
+    naming: '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1.1-4.6A8 8 0 1 1 21 12z"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01"/>',
+    trash: '<path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/>',
+    save: '<path d="M6 3h12v18l-6-4.5L6 21z"/>',
+    download: '<path d="M12 4v11"/><path d="M7.5 10.5L12 15l4.5-4.5"/><path d="M5 20h14"/>',
+    hand: '<path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V10"/><path d="M12 10V4.5a1.5 1.5 0 0 1 3 0V10"/><path d="M15 10V6.5a1.5 1.5 0 0 1 3 0V14a7 7 0 0 1-7 7h-.6a6 6 0 0 1-4.9-2.5L3.3 15a1.5 1.5 0 0 1 2.3-1.9L9 16V11"/>',
+    wait: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'
+  };
+
+  function icon(name) {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('class', 'icon');
+    svg.innerHTML = ICON_PATHS[name];
+    return svg;
+  }
+
+  function mountIcons(root) {
+    root.querySelectorAll('[data-icon]').forEach((el) => el.replaceWith(icon(el.dataset.icon)));
+  }
+
+  /* ================= עזרים ================= */
+  const $ = (id) => document.getElementById(id);
+
+  function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  function shuffle(list) {
+    const copy = list.slice();
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }
+
+  function setMessage(el, text, detail) {
+    el.textContent = text;
+    if (detail) {
+      const bdi = document.createElement('bdi');
+      bdi.textContent = detail;
+      el.appendChild(bdi);
+    }
+  }
+
+  const NIQQUD_RE = /[\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7]/g;
+
+  function stripNiqqud(text) {
+    return text.replace(NIQQUD_RE, '');
+  }
+
+  function startOfDay(ts) {
+    const d = new Date(ts);
+    d.setHours(0, 0, 0, 0);
+    return d.getTime();
+  }
+
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const dateFormat = new Intl.DateTimeFormat('he-IL', { day: 'numeric', month: 'numeric', year: 'numeric' });
+  const timeFormat = new Intl.DateTimeFormat('he-IL', { hour: '2-digit', minute: '2-digit' });
+
+  function storageErrorText(err) {
+    return ['לא הצלחנו לגשת לנתונים השמורים במכשיר.', err && err.message ? err.message : ''];
+  }
+
+  /* ================= הגדרות משתמש ================= */
+  function loadSettings() {
+    let stored = {};
+    try {
+      stored = JSON.parse(window.localStorage.getItem(SETTINGS_KEY) || '{}');
+    } catch (err) {
+      stored = {};
+    }
+    return {
+      speechRate: Object.hasOwn(SPEECH_RATES, stored.speechRate) ? stored.speechRate : DEFAULT_SETTINGS.speechRate,
+      textScale: Object.hasOwn(TEXT_SCALES, stored.textScale) ? stored.textScale : DEFAULT_SETTINGS.textScale,
+      oneAtATime: typeof stored.oneAtATime === 'boolean' ? stored.oneAtATime : DEFAULT_SETTINGS.oneAtATime
+    };
+  }
+
+  let settings = loadSettings();
+
+  function saveSettings() {
+    try {
+      window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+      return null;
+    } catch (err) {
+      return err;
+    }
+  }
+
+  /* ================= מסד נתונים במכשיר ================= */
+  let dbPromise = null;
+
+  function openDb() {
+    if (!dbPromise) {
+      dbPromise = new Promise((resolve, reject) => {
+        const request = indexedDB.open('ma-ze', 1);
+        request.onupgradeneeded = () => {
+          const database = request.result;
+          database.createObjectStore('album', { keyPath: 'id', autoIncrement: true });
+          const attempts = database.createObjectStore('attempts', { keyPath: 'id', autoIncrement: true });
+          attempts.createIndex('at', 'at');
+          database.createObjectStore('words', { keyPath: 'label' });
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      dbPromise.catch(() => { dbPromise = null; });
+    }
+    return dbPromise;
+  }
+
+  async function dbRun(storeName, mode, action) {
+    const database = await openDb();
+    return new Promise((resolve, reject) => {
+      const tx = database.transaction(storeName, mode);
+      const request = action(tx.objectStore(storeName));
+      tx.oncomplete = () => resolve(request.result);
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(tx.error);
+    });
+  }
+
+  const db = {
+    getAll: (store) => dbRun(store, 'readonly', (s) => s.getAll()),
+    get: (store, key) => dbRun(store, 'readonly', (s) => s.get(key)),
+    put: (store, value) => dbRun(store, 'readwrite', (s) => s.put(value)),
+    add: (store, value) => dbRun(store, 'readwrite', (s) => s.add(value)),
+    remove: (store, key) => dbRun(store, 'readwrite', (s) => s.delete(key)),
+    clear: (store) => dbRun(store, 'readwrite', (s) => s.clear())
+  };
+
+  async function recordAttempt(entry) {
+    try {
+      await db.add('attempts', { at: Date.now(), heard: '', cueLevel: 0, wrongTaps: 0, ...entry });
+      return null;
+    } catch (err) {
+      return err;
+    }
+  }
 
   /* ================= דיבור ================= */
+  let hebrewVoice = null;
+
   function pickHebrewVoice() {
     const voices = window.speechSynthesis.getVoices();
     const match = voices.find((v) => {
@@ -557,11 +1673,121 @@
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'he-IL';
     if (hebrewVoice) utterance.voice = hebrewVoice;
-    utterance.rate = SPEECH_RATE;
+    utterance.rate = SPEECH_RATES[settings.speechRate];
     window.speechSynthesis.speak(utterance);
   }
 
+  const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let activeRecognition = null;
+
+  function listenOnce() {
+    return new Promise((resolve, reject) => {
+      const recognition = new SpeechRecognitionCtor();
+      recognition.lang = 'he-IL';
+      recognition.interimResults = false;
+      recognition.continuous = false;
+      recognition.maxAlternatives = 5;
+      let settled = false;
+
+      recognition.onresult = (event) => {
+        if (settled) return;
+        settled = true;
+        const alternatives = [];
+        for (const result of event.results) {
+          for (let i = 0; i < result.length; i++) alternatives.push(result[i].transcript);
+        }
+        resolve(alternatives);
+      };
+      recognition.onerror = (event) => {
+        if (settled) return;
+        settled = true;
+        reject(event.error);
+      };
+      recognition.onend = () => {
+        activeRecognition = null;
+        if (settled) return;
+        settled = true;
+        resolve([]);
+      };
+
+      activeRecognition = recognition;
+      recognition.start();
+    });
+  }
+
+  function stopListening() {
+    if (activeRecognition) activeRecognition.abort();
+  }
+
+  function recognitionErrorText(code) {
+    switch (code) {
+      case 'not-allowed':
+      case 'service-not-allowed':
+        return 'אין הרשאה למיקרופון. אשרו גישה למיקרופון בהגדרות הדפדפן.';
+      case 'no-speech':
+        return 'לא שמעתי. נסו שוב.';
+      case 'audio-capture':
+        return 'לא נמצא מיקרופון במכשיר.';
+      case 'network':
+        return 'זיהוי הדיבור צריך חיבור לאינטרנט.';
+      case 'language-not-supported':
+        return 'הדפדפן לא תומך בזיהוי דיבור בעברית.';
+      case 'aborted':
+        return '';
+      default:
+        return 'זיהוי הדיבור נכשל. נסו שוב.';
+    }
+  }
+
+  const FINAL_LETTERS = { 'ך': 'כ', 'ם': 'מ', 'ן': 'נ', 'ף': 'פ', 'ץ': 'צ' };
+
+  function normalizeHebrew(text) {
+    return stripNiqqud(text)
+      .replace(/[ךםןףץ]/g, (c) => FINAL_LETTERS[c])
+      .replace(/[^\u05D0-\u05EA0-9a-zA-Z]+/g, ' ')
+      .trim()
+      .toLowerCase();
+  }
+
+  function stripArticle(word) {
+    return word.length > 2 && word.startsWith('ה') ? word.slice(1) : word;
+  }
+
+  function similarity(a, b) {
+    if (a === b) return 1;
+    const rows = a.length + 1;
+    const cols = b.length + 1;
+    let prev = Array.from({ length: cols }, (_, j) => j);
+    for (let i = 1; i < rows; i++) {
+      const row = [i];
+      for (let j = 1; j < cols; j++) {
+        row[j] = Math.min(prev[j] + 1, row[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      }
+      prev = row;
+    }
+    return 1 - prev[cols - 1] / Math.max(a.length, b.length);
+  }
+
+  // בודק אם אחת מגרסאות התמלול מכילה את המילה, בסלחנות לשגיאת אות אחת ולה' הידיעה
+  function spokenMatches(alternatives, label) {
+    const target = normalizeHebrew(label).split(' ').filter(Boolean).map(stripArticle).join('');
+    for (const alternative of alternatives) {
+      const words = normalizeHebrew(alternative).split(' ').filter(Boolean).map(stripArticle);
+      for (let size = 1; size <= Math.min(words.length, 4); size++) {
+        for (let i = 0; i + size <= words.length; i++) {
+          if (similarity(words.slice(i, i + size).join(''), target) >= 0.75) return true;
+        }
+      }
+    }
+    return false;
+  }
+
   /* ================= Gemini ================= */
+  let apiKey = '';
+  let cspBlocked = false;
+  let blockedUntil = 0;
+  const requestTimes = [];
+
   class ApiError extends Error {
     constructor(kind, retryAfterMs, detail) {
       super(kind);
@@ -569,10 +1795,6 @@
       this.retryAfterMs = retryAfterMs;
       this.detail = detail;
     }
-  }
-
-  function sleep(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   // אתרים עם Content-Security-Policy שחוסם connect-src (למשל Neocities חינמי) חוסמים את הפנייה ל-Gemini
@@ -596,12 +1818,38 @@
     }
   }
 
+  function errorFromResponse(status, body) {
+    const apiError = body && body.error ? body.error : {};
+    const details = Array.isArray(apiError.details) ? apiError.details : [];
+    const message = typeof apiError.message === 'string' ? apiError.message : `HTTP ${status}`;
+
+    if (status === 429) {
+      const retryInfo = details.find((d) => typeof d['@type'] === 'string' && d['@type'].endsWith('RetryInfo'));
+      const seconds = retryInfo ? parseFloat(retryInfo.retryDelay) : NaN;
+      return new ApiError('quota', Number.isFinite(seconds) ? Math.ceil(seconds * 1000) : QUOTA_WAIT_MS);
+    }
+    if (details.some((d) => d.reason === 'API_KEY_INVALID')) return new ApiError('key', 0, message);
+    if (status >= 500) return new ApiError('server', RETRY_AFTER_ERROR_MS);
+    return new ApiError('config', 0, message);
+  }
+
+  function apiErrorText(err) {
+    if (!(err instanceof ApiError)) return ['אירעה שגיאה לא צפויה.', err && err.message ? err.message : ''];
+    switch (err.kind) {
+      case 'key': return ['מפתח ה-API של Gemini לא תקין. החליפו אותו בהגדרות.', ''];
+      case 'csp': return [CSP_TEXT, ''];
+      case 'config': return ['Gemini דחה את הבקשה:', err.detail];
+      case 'quota': return ['הגעתם למכסת השימוש החינמית של Gemini. ממשיכים לבד כשהמכסה תתפנה.', ''];
+      case 'network': return ['אין חיבור לאינטרנט. ממשיכים לבד כשהחיבור יחזור.', ''];
+      case 'server': return ['שירות Gemini עמוס כרגע. מנסים שוב…', ''];
+      default: return ['התקבלה תשובה לא תקינה מ-Gemini. מנסים שוב…', ''];
+    }
+  }
+
   async function verifyKey(key) {
     let response;
     try {
-      response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}`, {
-        headers: { 'x-goog-api-key': key }
-      });
+      response = await fetch(`${GEMINI_BASE}/${GEMINI_MODEL}`, { headers: { 'x-goog-api-key': key } });
     } catch (err) {
       return connectionFailure();
     }
@@ -626,35 +1874,22 @@
     }
   }
 
-  function encodeFrame(source, sw, sh) {
-    const scale = Math.min(1, MAX_UPLOAD_SIDE / Math.max(sw, sh));
-    uploadCanvas.width = Math.round(sw * scale);
-    uploadCanvas.height = Math.round(sh * scale);
-    uploadCtx.drawImage(source, 0, 0, uploadCanvas.width, uploadCanvas.height);
-    return uploadCanvas.toDataURL('image/jpeg', JPEG_QUALITY).split(',')[1];
+  function noteTransientError(err) {
+    blockedUntil = Math.max(blockedUntil, Date.now() + err.retryAfterMs);
   }
 
-  async function requestDetections(imageBase64) {
+  async function callGemini(systemText, parts, schema) {
     let response;
     try {
       response = await fetch(GEMINI_ENDPOINT, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-goog-api-key': apiKey
-        },
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
         body: JSON.stringify({
-          systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-          contents: [{
-            role: 'user',
-            parts: [
-              { inlineData: { mimeType: 'image/jpeg', data: imageBase64 } },
-              { text: USER_PROMPT }
-            ]
-          }],
+          systemInstruction: { parts: [{ text: systemText }] },
+          contents: [{ role: 'user', parts }],
           generationConfig: {
             responseMimeType: 'application/json',
-            responseSchema: RESPONSE_SCHEMA,
+            responseSchema: schema,
             thinkingConfig: { thinkingLevel: 'low' }
           }
         })
@@ -664,51 +1899,32 @@
     }
 
     const body = await readJson(response);
-
     if (!response.ok) throw errorFromResponse(response.status, body);
-    return parseDetections(body);
-  }
 
-  function errorFromResponse(status, body) {
-    const apiError = body && body.error ? body.error : {};
-    const details = Array.isArray(apiError.details) ? apiError.details : [];
-    const message = typeof apiError.message === 'string' ? apiError.message : `HTTP ${status}`;
-
-    if (status === 429) {
-      const retryInfo = details.find((d) => typeof d['@type'] === 'string' && d['@type'].endsWith('RetryInfo'));
-      const seconds = retryInfo ? parseFloat(retryInfo.retryDelay) : NaN;
-      return new ApiError('quota', Number.isFinite(seconds) ? Math.ceil(seconds * 1000) : QUOTA_WAIT_MS);
-    }
-    if (details.some((d) => d.reason === 'API_KEY_INVALID')) {
-      return new ApiError('key', 0, message);
-    }
-    if (status >= 500) {
-      return new ApiError('server', RETRY_AFTER_ERROR_MS);
-    }
-    return new ApiError('config', 0, message);
-  }
-
-  function parseDetections(body) {
     const candidate = body && Array.isArray(body.candidates) ? body.candidates[0] : null;
-    const parts = candidate && candidate.content && Array.isArray(candidate.content.parts)
+    const responseParts = candidate && candidate.content && Array.isArray(candidate.content.parts)
       ? candidate.content.parts
       : null;
-    if (!parts) throw new ApiError('bad-response', RETRY_AFTER_ERROR_MS);
+    if (!responseParts) throw new ApiError('bad-response', RETRY_AFTER_ERROR_MS);
 
-    const text = parts
+    const text = responseParts
       .filter((p) => typeof p.text === 'string' && !p.thought)
       .map((p) => p.text)
       .join('');
-
-    let items;
     try {
-      items = JSON.parse(text);
+      return JSON.parse(text);
     } catch (err) {
       throw new ApiError('bad-response', RETRY_AFTER_ERROR_MS);
     }
-    if (!Array.isArray(items)) throw new ApiError('bad-response', RETRY_AFTER_ERROR_MS);
+  }
 
-    return items.map(toDetection).filter((d) => d !== null);
+  function encodeFrame(source, sw, sh) {
+    const scale = Math.min(1, MAX_UPLOAD_SIDE / Math.max(sw, sh));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(sw * scale);
+    canvas.height = Math.round(sh * scale);
+    canvas.getContext('2d').drawImage(source, 0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL('image/jpeg', JPEG_QUALITY).split(',')[1];
   }
 
   // המרה מ-[ymin, xmin, ymax, xmax] בסקאלה 0-1000 לקואורדינטות יחסיות 0-1
@@ -723,414 +1939,137 @@
     return { label, x1: xmin, y1: ymin, x2: xmax, y2: ymax };
   }
 
-  function handleApiError(err) {
-    if (!(err instanceof ApiError)) throw err;
-    if (err.kind === 'key' || err.kind === 'config' || err.kind === 'csp') {
-      fatalError = err;
-    } else {
-      transientError = err;
-      blockedUntil = Math.max(blockedUntil, Date.now() + err.retryAfterMs);
-    }
-    refreshStatus();
+  async function requestDetections(imageBase64) {
+    const items = await callGemini(DETECT_PROMPT, [
+      { inlineData: { mimeType: 'image/jpeg', data: imageBase64 } },
+      { text: 'Detect the objects in this image.' }
+    ], DETECT_SCHEMA);
+    if (!Array.isArray(items)) throw new ApiError('bad-response', RETRY_AFTER_ERROR_MS);
+    return items.map(toDetection).filter((d) => d !== null);
   }
 
-  /* ================= שורת מצב ================= */
-  function showInfo(icon, text) {
-    statusEl.classList.remove('is-error');
-    statusEl.innerHTML = ICONS[icon];
-    const span = document.createElement('span');
-    span.textContent = text;
-    statusEl.appendChild(span);
+  function isFilledString(value) {
+    return typeof value === 'string' && value.trim() !== '';
   }
 
-  function showError(text, detail) {
-    statusEl.classList.add('is-error');
-    statusEl.textContent = text;
-    if (detail) {
-      statusEl.appendChild(document.createElement('br'));
-      const bdi = document.createElement('bdi');
-      bdi.textContent = detail;
-      statusEl.appendChild(bdi);
-    }
+  async function requestWordDetails(label) {
+    const data = await callGemini(WORD_PROMPT, [{ text: label }], WORD_SCHEMA);
+    const valid = data &&
+      isFilledString(data.niqqud) &&
+      isFilledString(data.first_sound) &&
+      isFilledString(data.where_question) &&
+      isFilledString(data.where_question_text) &&
+      Array.isArray(data.syllables) && data.syllables.length > 0 &&
+      data.syllables.every((w) => Array.isArray(w) && w.length > 0 && w.every(isFilledString)) &&
+      Array.isArray(data.phrases) && data.phrases.length > 0 &&
+      data.phrases.every((p) => p && isFilledString(p.text) && isFilledString(p.niqqud));
+    if (!valid) throw new ApiError('bad-response', RETRY_AFTER_ERROR_MS);
+    return {
+      niqqud: data.niqqud.trim(),
+      syllables: data.syllables.map((w) => w.map((s) => s.trim())),
+      firstSound: data.first_sound.trim(),
+      whereQuestion: data.where_question.trim(),
+      whereQuestionText: data.where_question_text.trim(),
+      phrases: data.phrases.map((p) => ({ text: p.text.trim(), niqqud: p.niqqud.trim() }))
+    };
   }
 
-  function refreshStatus() {
-    if (fatalError) {
-      if (fatalError.kind === 'key') {
-        showError('מפתח ה-API של Gemini לא תקין. רעננו את הדף והחליפו אותו בהגדרות.');
-      } else if (fatalError.kind === 'csp') {
-        showError(CSP_TEXT);
-      } else {
-        showError('Gemini דחה את הבקשה:', fatalError.detail);
-      }
-      return;
-    }
+  // פרטי מילה נשמרים במכשיר, כך שכל מילה עולה בקשה אחת בלבד
+  const wordRequests = new Map();
 
-    if (transientError) {
-      const texts = {
-        quota: 'הגעתם למכסת השימוש החינמית של Gemini. הזיהוי ימשיך לבד כשהמכסה תתפנה.',
-        network: 'אין חיבור לאינטרנט. הזיהוי ימשיך לבד כשהחיבור יחזור.',
-        server: 'שירות Gemini עמוס כרגע. מנסה שוב…',
-        'bad-response': 'התקבלה תשובה לא תקינה מ-Gemini. מנסה שוב…'
-      };
-      showError(texts[transientError.kind]);
-      return;
-    }
-
-    if (frozen) {
-      if (frozenPending) {
-        showInfo('wait', 'מזהה…');
-      } else if (frozenDetections.length === 0) {
-        showInfo('empty', 'לא זוהו חפצים');
-      } else {
-        showInfo('hand', 'גע בחפץ');
-      }
-      return;
-    }
-
-    if (!hasLiveResult) {
-      showInfo('wait', 'מזהה…');
-      return;
-    }
-
-    statusEl.classList.remove('is-error');
-    statusEl.textContent = '';
-  }
-
-  /* ================= פתיחת מצלמה ================= */
-  function cameraErrorText(err) {
-    if (!window.isSecureContext || !navigator.mediaDevices) {
-      return 'המצלמה עובדת רק כשהדף פתוח בכתובת מאובטחת (https).';
-    }
-    switch (err && err.name) {
-      case 'NotAllowedError':
-      case 'SecurityError':
-        return 'אין הרשאה למצלמה. אשרו גישה למצלמה בהגדרות הדפדפן ונסו שוב.';
-      case 'NotFoundError':
-      case 'OverconstrainedError':
-        return 'לא נמצאה מצלמה במכשיר.';
-      case 'NotReadableError':
-        return 'המצלמה תפוסה על ידי אפליקציה אחרת. סגרו אותה ונסו שוב.';
-      default:
-        return 'לא הצלחנו לפתוח את המצלמה.';
-    }
-  }
-
-  async function openCamera() {
-    openBtn.disabled = true;
-    startMsg.textContent = '';
-
-    let stream;
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({
-        audio: false,
-        video: {
-          facingMode: { ideal: 'environment' },
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
+  function getWordDetails(label, onRetry) {
+    let entry = wordRequests.get(label);
+    if (!entry) {
+      entry = { listeners: new Set(), promise: null };
+      entry.promise = (async () => {
+        const stored = await db.get('words', label);
+        if (stored) return stored.details;
+        for (;;) {
+          await acquireSlot(REQUESTS_PER_MINUTE, () => true);
+          try {
+            const details = await requestWordDetails(label);
+            await db.put('words', { label, details });
+            return details;
+          } catch (err) {
+            if (!(err instanceof ApiError) || FATAL_KINDS.has(err.kind)) throw err;
+            noteTransientError(err);
+            entry.listeners.forEach((listener) => listener(err));
+          }
         }
-      });
-    } catch (err) {
-      startMsg.textContent = cameraErrorText(err);
-      openBtn.disabled = false;
-      return;
+      })();
+      wordRequests.set(label, entry);
+      entry.promise.catch(() => wordRequests.delete(label));
     }
-
-    video.srcObject = stream;
-    await video.play();
-    await document.fonts.load('700 28px Rubik');
-
-    startScreen.hidden = true;
-    cameraScreen.hidden = false;
-
-    new ResizeObserver(resizeCanvas).observe(viewWrap);
-    resizeCanvas();
-    requestAnimationFrame(renderLoop);
-
-    refreshStatus();
-    liveLoop();
+    if (onRetry) entry.listeners.add(onRetry);
+    return entry.promise.finally(() => {
+      if (onRetry) entry.listeners.delete(onRetry);
+    });
   }
 
-  /* ================= זיהוי חי ================= */
-  async function liveLoop() {
-    if (liveLoopRunning) return;
-    liveLoopRunning = true;
-    const isWanted = () => !frozen && !fatalError;
-
-    while (isWanted()) {
-      const got = await acquireSlot(REQUESTS_PER_MINUTE - FREEZE_RESERVE, isWanted);
-      if (!got) break;
-
-      const token = liveToken;
-      const startedAt = Date.now();
-      const image = encodeFrame(video, video.videoWidth, video.videoHeight);
-
-      try {
-        const detections = await requestDetections(image);
-        transientError = null;
-        if (token === liveToken) {
-          liveDetections = detections;
-          hasLiveResult = true;
-        }
-        refreshStatus();
-      } catch (err) {
-        handleApiError(err);
-      }
-
-      const nextAt = startedAt + LIVE_INTERVAL_MS;
-      while (isWanted() && Date.now() < nextAt) await sleep(250);
-    }
-
-    liveLoopRunning = false;
+  function formatSyllables(details) {
+    return details.syllables.map((word) => word.join('-')).join('   ');
   }
 
-  /* ================= זיהוי תמונה קפואה ================= */
-  async function detectFrozen(token) {
-    const isWanted = () => frozen && token === freezeToken && !fatalError;
-    const image = encodeFrame(frozenCanvas, frozenCanvas.width, frozenCanvas.height);
-
-    while (isWanted()) {
-      const got = await acquireSlot(REQUESTS_PER_MINUTE, isWanted);
-      if (!got) return;
-
-      try {
-        const detections = await requestDetections(image);
-        transientError = null;
-        if (!isWanted()) return;
-        frozenDetections = detections;
-        frozenPending = false;
-        selectedIndex = -1;
-        drawFrozen();
-        refreshStatus();
-        return;
-      } catch (err) {
-        handleApiError(err);
-      }
-    }
+  function cropCanvas(source, sw, sh, d, maxSide) {
+    const padX = (d.x2 - d.x1) * 0.06;
+    const padY = (d.y2 - d.y1) * 0.06;
+    const x1 = Math.max(0, d.x1 - padX) * sw;
+    const y1 = Math.max(0, d.y1 - padY) * sh;
+    const x2 = Math.min(1, d.x2 + padX) * sw;
+    const y2 = Math.min(1, d.y2 + padY) * sh;
+    const w = x2 - x1;
+    const h = y2 - y1;
+    const scale = Math.min(1, maxSide / Math.max(w, h));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(w * scale));
+    canvas.height = Math.max(1, Math.round(h * scale));
+    canvas.getContext('2d').drawImage(source, x1, y1, w, h, 0, 0, canvas.width, canvas.height);
+    return canvas;
   }
 
-  /* ================= קנבס ================= */
-  function resizeCanvas() {
-    const rect = viewWrap.getBoundingClientRect();
-    const dpr = window.devicePixelRatio;
-    view.width = Math.round(rect.width * dpr);
-    view.height = Math.round(rect.height * dpr);
-    if (frozen) drawFrozen();
+  function canvasToBlob(canvas) {
+    return new Promise((resolve, reject) => {
+      canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('toBlob failed'))), 'image/jpeg', JPEG_QUALITY);
+    });
   }
 
-  function renderLoop() {
-    if (!frozen) {
-      draw(video, video.videoWidth, video.videoHeight, liveDetections, -1);
-    }
-    requestAnimationFrame(renderLoop);
-  }
+  /* ================= מסכים ================= */
+  const screens = {
+    home: $('homeScreen'),
+    setup: $('setupScreen'),
+    settings: $('settingsScreen'),
+    camera: $('cameraScreen'),
+    album: $('albumScreen'),
+    practice: $('practiceScreen'),
+    naming: $('namingScreen'),
+    where: $('whereScreen'),
+    summary: $('summaryScreen'),
+    progress: $('progressScreen')
+  };
 
-  function drawFrozen() {
-    draw(frozenCanvas, frozenCanvas.width, frozenCanvas.height, frozenDetections, selectedIndex);
-  }
-
-  function draw(source, sw, sh, detections, selected) {
-    const cw = view.width;
-    const ch = view.height;
-
-    ctx.fillStyle = COLORS.inkDeep;
-    ctx.fillRect(0, 0, cw, ch);
-    labelHits = [];
-    if (!sw || !sh) return;
-
-    const scale = Math.max(cw / sw, ch / sh);
-    const dw = sw * scale;
-    const dh = sh * scale;
-    const ox = (cw - dw) / 2;
-    const oy = (ch - dh) / 2;
-    mapping = { ox, oy, dw, dh };
-
-    ctx.drawImage(source, ox, oy, dw, dh);
-
-    const dpr = window.devicePixelRatio;
-    const baseFont = Math.round(Math.min(Math.max((cw / dpr) * 0.055, 20), 30) * dpr);
-
-    const order = detections.map((_, i) => i).filter((i) => i !== selected);
-    if (selected >= 0 && selected < detections.length) order.push(selected);
-
-    const boxes = [];
-    for (const i of order) {
-      const d = detections[i];
-      const x1 = Math.max(ox + d.x1 * dw, 0);
-      const y1 = Math.max(oy + d.y1 * dh, 0);
-      const x2 = Math.min(ox + d.x2 * dw, cw);
-      const y2 = Math.min(oy + d.y2 * dh, ch);
-      if (x2 <= x1 || y2 <= y1) continue;
-      boxes.push({ i, x1, y1, x2, y2 });
-    }
-
-    for (const b of boxes) drawBox(b, b.i === selected, dpr);
-    for (const b of boxes) drawTag(b, detections[b.i].label, b.i === selected, baseFont, cw, ch);
-  }
-
-  function drawBox(b, isSelected, dpr) {
-    const w = b.x2 - b.x1;
-    const h = b.y2 - b.y1;
-    const r = Math.min(14 * dpr, w / 4, h / 4);
-
-    ctx.beginPath();
-    ctx.roundRect(b.x1, b.y1, w, h, r);
-    if (isSelected) {
-      ctx.fillStyle = COLORS.selectedFill;
-      ctx.fill();
-    }
-    ctx.lineWidth = (isSelected ? 9 : 7) * dpr;
-    ctx.strokeStyle = COLORS.boxShadow;
-    ctx.stroke();
-    ctx.lineWidth = (isSelected ? 5 : 3) * dpr;
-    ctx.strokeStyle = isSelected ? COLORS.paper : COLORS.tag;
-    ctx.stroke();
-  }
-
-  function drawTag(b, text, isSelected, baseFont, cw, ch) {
-    const size = Math.round(isSelected ? baseFont * 1.4 : baseFont);
-
-    ctx.font = `700 ${size}px Rubik`;
-    ctx.direction = 'rtl';
-    const textW = ctx.measureText(text).width;
-
-    const padX = size * 0.5;
-    const padY = size * 0.32;
-    const holeR = size * 0.13;
-    const holeGap = size * 0.3;
-    const tagW = textW + padX * 2 + holeR * 2 + holeGap;
-    const tagH = size + padY * 2;
-    const radius = size * 0.28;
-
-    // בעברית התווית נצמדת לפינה הימנית-עליונה של החפץ
-    let x = b.x2 - tagW;
-    let y = b.y1 - tagH - size * 0.15;
-    if (y < 0) y = b.y1 + size * 0.15;
-    x = Math.min(Math.max(x, 0), cw - tagW);
-    y = Math.min(Math.max(y, 0), ch - tagH);
-
-    ctx.beginPath();
-    ctx.roundRect(x, y, tagW, tagH, radius);
-    ctx.fillStyle = isSelected ? COLORS.paper : COLORS.tag;
-    ctx.shadowColor = COLORS.boxShadow;
-    ctx.shadowBlur = size * 0.4;
-    ctx.shadowOffsetY = size * 0.08;
-    ctx.fill();
-    ctx.shadowColor = 'transparent';
-    ctx.shadowBlur = 0;
-    ctx.shadowOffsetY = 0;
-
-    // חור התלייה של התווית
-    ctx.beginPath();
-    ctx.arc(x + tagW - padX * 0.7 - holeR, y + tagH / 2, holeR, 0, Math.PI * 2);
-    ctx.fillStyle = COLORS.ink;
-    ctx.fill();
-
-    ctx.fillStyle = COLORS.ink;
-    ctx.textAlign = 'right';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(text, x + tagW - padX * 0.7 - holeR * 2 - holeGap, y + tagH / 2 + size * 0.04);
-
-    labelHits.push({ i: b.i, x, y, w: tagW, h: tagH });
-  }
-
-  /* ================= הקפאה ================= */
-  function updateFreezeUI() {
-    freezeLabel.textContent = frozen ? 'המשך' : 'הקפא';
-    iconPause.hidden = frozen;
-    iconPlay.hidden = !frozen;
-    viewWrap.classList.toggle('is-frozen', frozen);
-    refreshStatus();
-  }
-
-  function freeze() {
-    frozen = true;
-    freezeToken += 1;
-    liveToken += 1;
-    selectedIndex = -1;
-    frozenDetections = [];
-    frozenPending = true;
-
-    frozenCanvas.width = video.videoWidth;
-    frozenCanvas.height = video.videoHeight;
-    frozenCtx.drawImage(video, 0, 0);
-
-    updateFreezeUI();
-    drawFrozen();
-    detectFrozen(freezeToken);
-  }
-
-  function unfreeze() {
-    frozen = false;
-    freezeToken += 1;
-    liveToken += 1;
-    selectedIndex = -1;
-    frozenPending = false;
-    liveDetections = [];
-    hasLiveResult = false;
+  function showScreen(name) {
+    stopListening();
     window.speechSynthesis.cancel();
-
-    updateFreezeUI();
-    liveLoop();
+    closeWordCard();
+    Object.entries(screens).forEach(([key, el]) => { el.hidden = key !== name; });
   }
 
-  /* ================= נגיעה בחפץ ================= */
-  function handleTap(event) {
-    if (!frozen || frozenPending) return;
+  document.querySelectorAll('[data-nav="home"]').forEach((btn) => {
+    btn.addEventListener('click', () => showScreen('home'));
+  });
 
-    const rect = view.getBoundingClientRect();
-    const px = (event.clientX - rect.left) * (view.width / rect.width);
-    const py = (event.clientY - rect.top) * (view.height / rect.height);
+  /* ================= מפתח Gemini ================= */
+  const savedKeyInfo = $('savedKeyInfo');
+  const keyInput = $('keyInput');
+  const setupMsg = $('setupMsg');
+  const saveKeyBtn = $('saveKeyBtn');
+  const backBtn = $('backBtn');
+  const deleteKeyBtn = $('deleteKeyBtn');
+  let setupOrigin = 'home';
 
-    let hit = -1;
-
-    for (let k = labelHits.length - 1; k >= 0; k--) {
-      const t = labelHits[k];
-      if (px >= t.x && px <= t.x + t.w && py >= t.y && py <= t.y + t.h) {
-        hit = t.i;
-        break;
-      }
-    }
-
-    if (hit < 0) {
-      const nx = (px - mapping.ox) / mapping.dw;
-      const ny = (py - mapping.oy) / mapping.dh;
-      let smallestArea = Infinity;
-      frozenDetections.forEach((d, i) => {
-        const area = (d.x2 - d.x1) * (d.y2 - d.y1);
-        if (nx >= d.x1 && nx <= d.x2 && ny >= d.y1 && ny <= d.y2 && area < smallestArea) {
-          smallestArea = area;
-          hit = i;
-        }
-      });
-    }
-
-    if (hit < 0) return;
-
-    selectedIndex = hit;
-    drawFrozen();
-    speak(frozenDetections[hit].label);
-  }
-
-  /* ================= הגדרת מפתח ================= */
-  function setMessage(el, text, detail) {
-    el.textContent = text;
-    if (detail) {
-      const bdi = document.createElement('bdi');
-      bdi.textContent = detail;
-      el.appendChild(bdi);
-    }
-  }
-
-  function showStartScreen() {
-    setupScreen.hidden = true;
-    startScreen.hidden = false;
-    openBtn.focus();
-  }
-
-  function showSetupScreen() {
-    startScreen.hidden = true;
-    setupScreen.hidden = false;
+  function showSetupScreen(origin) {
+    setupOrigin = origin;
+    showScreen('setup');
     keyInput.value = '';
     setMessage(setupMsg, '');
     const hasKey = apiKey !== '';
@@ -1139,6 +2078,11 @@
     backBtn.hidden = !hasKey;
     deleteKeyBtn.hidden = !hasKey;
     keyInput.focus();
+  }
+
+  function leaveSetup() {
+    if (setupOrigin === 'settings') showSettings();
+    else showScreen('home');
   }
 
   async function saveKey() {
@@ -1177,7 +2121,8 @@
     }
 
     apiKey = key;
-    showStartScreen();
+    cspBlocked = false;
+    leaveSetup();
   }
 
   function deleteKey() {
@@ -1188,21 +2133,1871 @@
       return;
     }
     apiKey = '';
-    showSetupScreen();
+    showSetupScreen('home');
   }
 
-  /* ================= אירועים ================= */
-  settingsBtn.addEventListener('click', showSetupScreen);
   saveKeyBtn.addEventListener('click', saveKey);
   keyInput.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') saveKey();
   });
-  backBtn.addEventListener('click', showStartScreen);
+  backBtn.addEventListener('click', leaveSetup);
   deleteKeyBtn.addEventListener('click', deleteKey);
 
-  openBtn.addEventListener('click', openCamera);
-  freezeBtn.addEventListener('click', () => (frozen ? unfreeze() : freeze()));
+  /* ================= הגדרות ================= */
+  const settingsKeyInfo = $('settingsKeyInfo');
+  const settingsMsg = $('settingsMsg');
+  const oneAtATimeBtn = $('oneAtATimeBtn');
+
+  function applySettings() {
+    document.documentElement.style.setProperty('--text-scale', String(TEXT_SCALES[settings.textScale]));
+    document.querySelectorAll('.segmented[data-setting]').forEach((group) => {
+      group.querySelectorAll('button').forEach((btn) => {
+        btn.setAttribute('aria-pressed', String(btn.dataset.value === settings[group.dataset.setting]));
+      });
+    });
+    oneAtATimeBtn.setAttribute('aria-pressed', String(settings.oneAtATime));
+    layoutCache = { items: null, key: '', tags: null };
+    if (cameraActive && frozen) drawFrozen();
+  }
+
+  function updateSetting(name, value) {
+    settings = { ...settings, [name]: value };
+    applySettings();
+    const error = saveSettings();
+    if (error) setMessage(settingsMsg, 'הדפדפן חוסם שמירת הגדרות. השינוי יישאר רק עד סגירת הדף.');
+    else setMessage(settingsMsg, '');
+  }
+
+  function showSettings() {
+    showScreen('settings');
+    setMessage(settingsKeyInfo, 'המפתח השמור מסתיים ב: ', apiKey.slice(-4));
+    applySettings();
+  }
+
+  document.querySelectorAll('.segmented[data-setting]').forEach((group) => {
+    group.addEventListener('click', (event) => {
+      const btn = event.target.closest('button');
+      if (btn) updateSetting(group.dataset.setting, btn.dataset.value);
+    });
+  });
+
+  oneAtATimeBtn.addEventListener('click', () => updateSetting('oneAtATime', !settings.oneAtATime));
+  $('testVoiceBtn').addEventListener('click', () => speak('כּוֹס. אֶפְשָׁר לְקַבֵּל כּוֹס מַיִם?'));
+  $('settingsKeyBtn').addEventListener('click', () => showSetupScreen('settings'));
+
+  /* ================= מצלמה ================= */
+  const homeMsg = $('homeMsg');
+  const homeCameraBtn = $('homeCameraBtn');
+  const viewWrap = $('viewWrap');
+  const video = $('video');
+  const view = $('view');
+  const ctx = view.getContext('2d');
+  const statusEl = $('status');
+  const closeCameraBtn = $('closeCameraBtn');
+  const switchCameraBtn = $('switchCameraBtn');
+  const barLive = $('barLive');
+  const barFrozen = $('barFrozen');
+  const barWhere = $('barWhere');
+  const cardBtn = $('cardBtn');
+  const whereSceneBtn = $('whereSceneBtn');
+  const nameSceneBtn = $('nameSceneBtn');
+  const whereQuestion = $('whereQuestion');
+  const whereFeedback = $('whereFeedback');
+  const whereRepeatBtn = $('whereRepeatBtn');
+  const whereShowBtn = $('whereShowBtn');
+  const whereNextBtn = $('whereNextBtn');
+
+  const frozenCanvas = document.createElement('canvas');
+  const frozenCtx = frozenCanvas.getContext('2d');
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  const COLORS = {
+    ink: '#0D2B33',
+    inkDeep: '#081E24',
+    tag: '#FFD23F',
+    paper: '#FFFFFF',
+    good: '#6FD08C',
+    shadow: 'rgba(8, 30, 36, 0.6)',
+    dim: 'rgba(8, 30, 36, 0.6)'
+  };
+
+  const BOX_STYLES = {
+    normal: { line: COLORS.tag, width: 3, fill: COLORS.tag },
+    focus: { line: COLORS.paper, width: 5, fill: COLORS.paper },
+    good: { line: COLORS.good, width: 6, fill: COLORS.good },
+    miss: { line: COLORS.tag, width: 5, fill: COLORS.tag }
+  };
+
+  let stream = null;
+  let cameraActive = false;
+  let rafId = 0;
+  let videoInputs = [];
+  let frozen = false;
+  let freezeToken = 0;
+  let liveToken = 0;
+  let liveDetections = [];
+  let hasLiveResult = false;
+  let frozenDetections = [];
+  let frozenPending = false;
+  let selectedIndex = -1;
+  let selectedStyle = 'focus';
+  let labelHits = [];
+  let mapping = { ox: 0, oy: 0, dw: 1, dh: 1 };
+  let liveLoopRunning = false;
+  let fatalError = null;
+  let transientError = null;
+  let cameraNotice = '';
+  let whereScene = null;
+  let whereToken = 0;
+  let layoutCache = { items: null, key: '', tags: null };
+
+  /* ---------- שורת מצב ---------- */
+  function showInfo(iconName, text) {
+    statusEl.classList.remove('is-error');
+    statusEl.replaceChildren(icon(iconName));
+    const span = document.createElement('span');
+    span.textContent = text;
+    statusEl.appendChild(span);
+  }
+
+  function showError(text, detail) {
+    statusEl.classList.add('is-error');
+    setMessage(statusEl, text, detail);
+  }
+
+  function refreshStatus() {
+    if (fatalError) {
+      showError(...apiErrorText(fatalError));
+      return;
+    }
+    if (cameraNotice) {
+      showError(cameraNotice);
+      return;
+    }
+    if (transientError) {
+      showError(...apiErrorText(transientError));
+      return;
+    }
+    if (frozen) {
+      if (whereScene) {
+        statusEl.classList.remove('is-error');
+        statusEl.textContent = '';
+      } else if (frozenPending) {
+        showInfo('wait', 'מזהה…');
+      } else if (frozenDetections.length === 0) {
+        showInfo('where', 'לא זוהו חפצים');
+      } else {
+        showInfo('hand', 'געו בחפץ');
+      }
+      return;
+    }
+    if (!hasLiveResult) {
+      showInfo('wait', 'מזהה…');
+      return;
+    }
+    statusEl.classList.remove('is-error');
+    statusEl.textContent = '';
+  }
+
+  function handleApiError(err) {
+    if (!(err instanceof ApiError)) throw err;
+    if (FATAL_KINDS.has(err.kind)) {
+      fatalError = err;
+    } else {
+      transientError = err;
+      noteTransientError(err);
+    }
+    refreshStatus();
+  }
+
+  /* ---------- פתיחה, סגירה והחלפה ---------- */
+  function cameraErrorText(err) {
+    if (!window.isSecureContext || !navigator.mediaDevices) {
+      return 'המצלמה עובדת רק כשהדף פתוח בכתובת מאובטחת (https).';
+    }
+    switch (err && err.name) {
+      case 'NotAllowedError':
+      case 'SecurityError':
+        return 'אין הרשאה למצלמה. אשרו גישה למצלמה בהגדרות הדפדפן ונסו שוב.';
+      case 'NotFoundError':
+      case 'OverconstrainedError':
+        return 'לא נמצאה מצלמה במכשיר.';
+      case 'NotReadableError':
+        return 'המצלמה תפוסה על ידי אפליקציה אחרת. סגרו אותה ונסו שוב.';
+      default:
+        return 'לא הצלחנו לפתוח את המצלמה.';
+    }
+  }
+
+  function requestStream(videoConstraints) {
+    return navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: { ...videoConstraints, width: { ideal: 1280 }, height: { ideal: 720 } }
+    });
+  }
+
+  function resetCameraState() {
+    frozen = false;
+    freezeToken += 1;
+    liveToken += 1;
+    whereToken += 1;
+    liveDetections = [];
+    hasLiveResult = false;
+    frozenDetections = [];
+    frozenPending = false;
+    selectedIndex = -1;
+    whereScene = null;
+    fatalError = null;
+    transientError = null;
+    cameraNotice = '';
+  }
+
+  async function openCamera() {
+    if (!apiKey) {
+      showSetupScreen('home');
+      return;
+    }
+    homeCameraBtn.disabled = true;
+    setMessage(homeMsg, '');
+
+    let newStream;
+    try {
+      newStream = await requestStream({ facingMode: { ideal: 'environment' } });
+    } catch (err) {
+      setMessage(homeMsg, cameraErrorText(err));
+      homeCameraBtn.disabled = false;
+      return;
+    }
+    homeCameraBtn.disabled = false;
+
+    stream = newStream;
+    video.srcObject = stream;
+    await video.play();
+    await document.fonts.load('700 28px Rubik');
+
+    resetCameraState();
+    cameraActive = true;
+    showScreen('camera');
+    showBar('live');
+    viewWrap.classList.remove('is-frozen');
+    resizeCanvas();
+    rafId = requestAnimationFrame(renderLoop);
+    refreshStatus();
+    liveLoop();
+    refreshVideoInputs();
+  }
+
+  async function refreshVideoInputs() {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      videoInputs = devices.filter((d) => d.kind === 'videoinput');
+    } catch (err) {
+      videoInputs = [];
+    }
+    switchCameraBtn.hidden = videoInputs.length < 2;
+  }
+
+  function closeCamera() {
+    cameraActive = false;
+    cancelAnimationFrame(rafId);
+    if (stream) stream.getTracks().forEach((track) => track.stop());
+    stream = null;
+    video.srcObject = null;
+    resetCameraState();
+    showScreen('home');
+  }
+
+  async function switchCamera() {
+    const currentId = stream.getVideoTracks()[0].getSettings().deviceId;
+    const index = videoInputs.findIndex((d) => d.deviceId === currentId);
+    const next = videoInputs[(index + 1) % videoInputs.length];
+
+    switchCameraBtn.disabled = true;
+    let newStream;
+    try {
+      newStream = await requestStream({ deviceId: { exact: next.deviceId } });
+    } catch (err) {
+      switchCameraBtn.disabled = false;
+      cameraNotice = cameraErrorText(err);
+      refreshStatus();
+      return;
+    }
+
+    stream.getTracks().forEach((track) => track.stop());
+    stream = newStream;
+    video.srcObject = stream;
+    await video.play();
+    switchCameraBtn.disabled = false;
+    cameraNotice = '';
+
+    if (frozen) {
+      unfreeze();
+    } else {
+      liveToken += 1;
+      liveDetections = [];
+      hasLiveResult = false;
+      refreshStatus();
+    }
+  }
+
+  /* ---------- זיהוי חי ---------- */
+  function interpolate(d, now) {
+    if (!d.from || reducedMotion.matches) return d;
+    const t = Math.min(1, (now - d.arrivedAt) / BOX_ANIMATION_MS);
+    const e = 1 - Math.pow(1 - t, 3);
+    return {
+      label: d.label,
+      prevTag: d.prevTag,
+      x1: d.from.x1 + (d.x1 - d.from.x1) * e,
+      y1: d.from.y1 + (d.y1 - d.from.y1) * e,
+      x2: d.from.x2 + (d.x2 - d.from.x2) * e,
+      y2: d.from.y2 + (d.y2 - d.from.y2) * e
+    };
+  }
+
+  // מתאים חפצים חדשים לקודמים באותו שם, כדי שהמסגרות יזוזו בהדרגה והכיתובים יישארו במקומם
+  function mergeLive(previous, next, now) {
+    const used = new Set();
+    return next.map((d) => {
+      let best = -1;
+      let bestDistance = 0.3;
+      previous.forEach((p, i) => {
+        if (used.has(i) || p.label !== d.label) return;
+        const distance = Math.hypot((p.x1 + p.x2) / 2 - (d.x1 + d.x2) / 2, (p.y1 + p.y2) / 2 - (d.y1 + d.y2) / 2);
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          best = i;
+        }
+      });
+      if (best < 0) return { ...d, from: null, arrivedAt: now, prevTag: null };
+      used.add(best);
+      const p = previous[best];
+      return { ...d, from: interpolate(p, now), arrivedAt: now, prevTag: p.prevTag };
+    });
+  }
+
+  async function liveLoop() {
+    if (liveLoopRunning) return;
+    liveLoopRunning = true;
+    const isWanted = () => cameraActive && !frozen && !fatalError;
+
+    while (isWanted()) {
+      const got = await acquireSlot(REQUESTS_PER_MINUTE - PRIORITY_RESERVE, isWanted);
+      if (!got) break;
+
+      const token = liveToken;
+      const startedAt = Date.now();
+      const image = encodeFrame(video, video.videoWidth, video.videoHeight);
+
+      try {
+        const detections = await requestDetections(image);
+        transientError = null;
+        if (token === liveToken && isWanted()) {
+          liveDetections = mergeLive(liveDetections, detections, performance.now());
+          hasLiveResult = true;
+        }
+        refreshStatus();
+      } catch (err) {
+        handleApiError(err);
+      }
+
+      const nextAt = startedAt + LIVE_INTERVAL_MS;
+      while (isWanted() && Date.now() < nextAt) await sleep(250);
+    }
+
+    liveLoopRunning = false;
+  }
+
+  /* ---------- זיהוי תמונה קפואה ---------- */
+  async function detectFrozen(token) {
+    const isWanted = () => cameraActive && frozen && token === freezeToken && !fatalError;
+    const image = encodeFrame(frozenCanvas, frozenCanvas.width, frozenCanvas.height);
+
+    while (isWanted()) {
+      const got = await acquireSlot(REQUESTS_PER_MINUTE, isWanted);
+      if (!got) return;
+
+      try {
+        const detections = await requestDetections(image);
+        transientError = null;
+        if (!isWanted()) return;
+        frozenDetections = detections;
+        frozenPending = false;
+        selectedIndex = -1;
+        updateFrozenTools();
+        refreshStatus();
+        drawFrozen();
+        return;
+      } catch (err) {
+        handleApiError(err);
+      }
+    }
+  }
+
+  /* ---------- ציור ---------- */
+  function resizeCanvas() {
+    const rect = viewWrap.getBoundingClientRect();
+    const dpr = window.devicePixelRatio;
+    view.width = Math.max(1, Math.round(rect.width * dpr));
+    view.height = Math.max(1, Math.round(rect.height * dpr));
+    if (cameraActive && frozen) drawFrozen();
+  }
+
+  new ResizeObserver(() => {
+    if (cameraActive) resizeCanvas();
+  }).observe(viewWrap);
+
+  function renderLoop(now) {
+    if (!cameraActive) return;
+    if (!frozen) {
+      const animating = !reducedMotion.matches &&
+        liveDetections.some((d) => d.from && now - d.arrivedAt < BOX_ANIMATION_MS);
+      const items = animating ? liveDetections.map((d) => interpolate(d, now)) : liveDetections;
+      const result = draw(video, video.videoWidth, video.videoHeight, items, -1, {
+        labels: 'all',
+        nearestOnly: settings.oneAtATime
+      });
+      if (result) {
+        for (const b of result.boxes) {
+          const rect = result.tags.get(b.i);
+          if (rect && liveDetections[b.i]) liveDetections[b.i].prevTag = { dx: rect.x - b.x2, dy: rect.y - b.y1 };
+        }
+      }
+    }
+    rafId = requestAnimationFrame(renderLoop);
+  }
+
+  function drawFrozen() {
+    draw(frozenCanvas, frozenCanvas.width, frozenCanvas.height, frozenDetections, selectedIndex, {
+      labels: whereScene || settings.oneAtATime ? 'selected' : 'all',
+      selectedStyle,
+      nearestOnly: false
+    });
+  }
+
+  function draw(source, sw, sh, items, selected, options) {
+    const cw = view.width;
+    const ch = view.height;
+
+    ctx.fillStyle = COLORS.inkDeep;
+    ctx.fillRect(0, 0, cw, ch);
+    labelHits = [];
+    if (!sw || !sh) return null;
+
+    const scale = Math.max(cw / sw, ch / sh);
+    const dw = sw * scale;
+    const dh = sh * scale;
+    const ox = (cw - dw) / 2;
+    const oy = (ch - dh) / 2;
+    mapping = { ox, oy, dw, dh };
+
+    ctx.drawImage(source, ox, oy, dw, dh);
+
+    const dpr = window.devicePixelRatio;
+    const baseFont = Math.round(Math.min(Math.max((cw / dpr) * 0.055, 20), 30) * dpr * TEXT_SCALES[settings.textScale]);
+
+    let boxes = [];
+    items.forEach((d, i) => {
+      const x1 = Math.max(ox + d.x1 * dw, 0);
+      const y1 = Math.max(oy + d.y1 * dh, 0);
+      const x2 = Math.min(ox + d.x2 * dw, cw);
+      const y2 = Math.min(oy + d.y2 * dh, ch);
+      if (x2 <= x1 || y2 <= y1) return;
+      boxes.push({ i, x1, y1, x2, y2, x: x1, y: y1, w: x2 - x1, h: y2 - y1, prevTag: d.prevTag || null });
+    });
+
+    if (options.nearestOnly && boxes.length > 1) {
+      const centerDistance = (b) => Math.hypot((b.x1 + b.x2) / 2 - cw / 2, (b.y1 + b.y2) / 2 - ch / 2);
+      boxes = [boxes.reduce((best, b) => (centerDistance(b) < centerDistance(best) ? b : best))];
+    }
+
+    const obstacles = overlayObstacles();
+    const showAll = options.labels === 'all';
+    const tags = showAll ? layoutTags(items, boxes, baseFont, obstacles, cw, ch) : new Map();
+
+    const others = boxes.filter((b) => b.i !== selected);
+    for (const b of others) drawBox(b, BOX_STYLES.normal, dpr);
+    if (showAll) {
+      for (const b of others) drawLeader(b, tags.get(b.i), BOX_STYLES.normal, dpr);
+      for (const b of others) drawTag(tags.get(b.i), items[b.i].label, BOX_STYLES.normal, b.i);
+    }
+
+    const chosen = boxes.find((b) => b.i === selected);
+    if (chosen) {
+      // החפץ שנבחר עובר לחזית: שאר התמונה מעומעמת והחפץ והכיתוב שלו מצוירים מעל הכול
+      const style = BOX_STYLES[options.selectedStyle];
+      ctx.fillStyle = COLORS.dim;
+      ctx.fillRect(0, 0, cw, ch);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(chosen.x, chosen.y, chosen.w, chosen.h, boxRadius(chosen, dpr));
+      ctx.clip();
+      ctx.drawImage(source, ox, oy, dw, dh);
+      ctx.restore();
+
+      drawBox(chosen, style, dpr);
+      const tag = measureTag(items[chosen.i].label, Math.round(baseFont * 1.4));
+      const rect = bestTagRect(chosen, tag, boxes, [], obstacles, cw, ch, SELECTED_LAYOUT_WEIGHTS);
+      drawLeader(chosen, rect, style, dpr);
+      drawTag(rect, items[chosen.i].label, style, chosen.i);
+    }
+
+    return { boxes, tags };
+  }
+
+  /* ---------- פריסת כיתובים ---------- */
+  const LAYOUT_WEIGHTS = { otherObject: 10, distance: 0.6, stability: 0.5 };
+  // לכיתוב של החפץ שנבחר: שאר החפצים מעומעמים, ולכן עדיף שהכיתוב יישאר צמוד לחפץ
+  const SELECTED_LAYOUT_WEIGHTS = { otherObject: 4, distance: 2, stability: 0 };
+
+  function rectOverlap(a, b) {
+    const w = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
+    const h = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
+    return w > 0 && h > 0 ? w * h : 0;
+  }
+
+  function rectGap(a, b) {
+    const dx = Math.max(b.x - (a.x + a.w), a.x - (b.x + b.w), 0);
+    const dy = Math.max(b.y - (a.y + a.h), a.y - (b.y + b.h), 0);
+    return Math.hypot(dx, dy);
+  }
+
+  function overlayObstacles() {
+    const vr = view.getBoundingClientRect();
+    if (vr.width === 0) return [];
+    const sx = view.width / vr.width;
+    const sy = view.height / vr.height;
+    return [statusEl, closeCameraBtn, switchCameraBtn]
+      .map((el) => el.getBoundingClientRect())
+      .filter((r) => r.width > 0 && r.height > 0)
+      .map((r) => ({ x: (r.left - vr.left) * sx, y: (r.top - vr.top) * sy, w: r.width * sx, h: r.height * sy }));
+  }
+
+  function measureTag(text, size) {
+    ctx.font = `700 ${size}px Rubik`;
+    ctx.direction = 'rtl';
+    const textW = ctx.measureText(text).width;
+    return { size, w: textW + size * 1.56, h: size * 1.64 };
+  }
+
+  // מיקומים אפשריים לכיתוב: מעל, מתחת ולצדי החפץ, בכמה מרחקים, ובסוף גם בתוך הפינות שלו
+  function tagCandidates(b, w, h, gap) {
+    const list = [];
+    const cx = (b.x1 + b.x2) / 2;
+    const cy = (b.y1 + b.y2) / 2;
+    const step = h + gap;
+    for (let k = 0; k < 4; k++) {
+      const off = gap + k * step;
+      for (const y of [b.y1 - h - off, b.y2 + off]) {
+        list.push({ x: b.x2 - w, y }, { x: cx - w / 2, y }, { x: b.x1, y });
+      }
+      for (const x of [b.x2 + off, b.x1 - w - off]) {
+        list.push({ x, y: b.y1 }, { x, y: cy - h / 2 }, { x, y: b.y2 - h });
+      }
+    }
+    list.push(
+      { x: b.x2 - w - gap, y: b.y1 + gap },
+      { x: b.x1 + gap, y: b.y1 + gap },
+      { x: b.x2 - w - gap, y: b.y2 - h - gap },
+      { x: b.x1 + gap, y: b.y2 - h - gap }
+    );
+    return list;
+  }
+
+  // המחיר של כל מיקום: כיסוי כיתובים אחרים (הכי יקר), כיסוי חפצים לפי החלק מהם שמכוסה, מרחק מהחפץ ושינוי מהמיקום הקודם
+  function bestTagRect(box, tag, boxes, placed, obstacles, cw, ch, weights) {
+    const gap = tag.size * 0.25;
+    const margin = tag.size * 0.2;
+    const tagArea = tag.w * tag.h;
+    const candidates = tagCandidates(box, tag.w, tag.h, gap);
+    const previous = box.prevTag && weights.stability ? { x: box.x2 + box.prevTag.dx, y: box.y1 + box.prevTag.dy } : null;
+    if (previous) candidates.unshift(previous);
+
+    let best = null;
+    let bestCost = Infinity;
+    for (const c of candidates) {
+      const r = {
+        x: Math.max(margin, Math.min(c.x, cw - tag.w - margin)),
+        y: Math.max(margin, Math.min(c.y, ch - tag.h - margin)),
+        w: tag.w,
+        h: tag.h,
+        size: tag.size
+      };
+
+      let cost = 0;
+      for (const p of placed) cost += 100 * rectOverlap(r, p) / tagArea;
+      for (const o of obstacles) cost += 100 * rectOverlap(r, o) / tagArea;
+      for (const b of boxes) {
+        cost += (b.i === box.i ? 20 : weights.otherObject) * rectOverlap(r, b) / (b.w * b.h);
+      }
+      cost += weights.distance * rectGap(r, box) / tag.h;
+      if (previous) cost += weights.stability * Math.hypot(r.x - previous.x, r.y - previous.y) / tag.h;
+
+      if (cost < bestCost) {
+        bestCost = cost;
+        best = r;
+      }
+    }
+    return best;
+  }
+
+  function layoutTags(items, boxes, baseFont, obstacles, cw, ch) {
+    const key = [cw, ch, baseFont, boxes.map((b) => b.i).join(',')]
+      .concat(obstacles.map((o) => `${Math.round(o.x)},${Math.round(o.y)},${Math.round(o.w)},${Math.round(o.h)}`))
+      .join('|');
+    if (layoutCache.items === items && layoutCache.key === key) return layoutCache.tags;
+
+    // חפצים קטנים מקבלים מקום ראשונים, כי כיתוב שמכסה אותם מסתיר אותם לגמרי
+    const order = boxes.slice().sort((a, b) => a.w * a.h - b.w * b.h);
+    const placed = [];
+    const tags = new Map();
+    for (const b of order) {
+      const rect = bestTagRect(b, measureTag(items[b.i].label, baseFont), boxes, placed, obstacles, cw, ch, LAYOUT_WEIGHTS);
+      placed.push(rect);
+      tags.set(b.i, rect);
+    }
+
+    layoutCache = { items, key, tags };
+    return tags;
+  }
+
+  function nearestSpan(a1, a2, b1, b2) {
+    if (a2 < b1) return [a2, b1];
+    if (b2 < a1) return [a1, b2];
+    const mid = (Math.max(a1, b1) + Math.min(a2, b2)) / 2;
+    return [mid, mid];
+  }
+
+  // קו מחבר כשהכיתוב רחוק מהחפץ שלו
+  function drawLeader(b, r, style, dpr) {
+    if (rectGap(r, b) < r.size * 0.4) return;
+    const [tx, bx] = nearestSpan(r.x, r.x + r.w, b.x, b.x + b.w);
+    const [ty, by] = nearestSpan(r.y, r.y + r.h, b.y, b.y + b.h);
+
+    ctx.beginPath();
+    ctx.moveTo(tx, ty);
+    ctx.lineTo(bx, by);
+    ctx.lineCap = 'round';
+    ctx.lineWidth = 6 * dpr;
+    ctx.strokeStyle = COLORS.shadow;
+    ctx.stroke();
+    ctx.lineWidth = 2.5 * dpr;
+    ctx.strokeStyle = style.line;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(bx, by, 4.5 * dpr, 0, Math.PI * 2);
+    ctx.fillStyle = style.line;
+    ctx.fill();
+  }
+
+  function boxRadius(b, dpr) {
+    return Math.min(14 * dpr, b.w / 4, b.h / 4);
+  }
+
+  function drawBox(b, style, dpr) {
+    ctx.beginPath();
+    ctx.roundRect(b.x, b.y, b.w, b.h, boxRadius(b, dpr));
+    ctx.lineWidth = (style.width + 4) * dpr;
+    ctx.strokeStyle = COLORS.shadow;
+    ctx.stroke();
+    ctx.lineWidth = style.width * dpr;
+    ctx.strokeStyle = style.line;
+    ctx.stroke();
+  }
+
+  function drawTag(r, text, style, index) {
+    const size = r.size;
+    const padX = size * 0.5;
+    const holeR = size * 0.13;
+    const holeGap = size * 0.3;
+
+    ctx.beginPath();
+    ctx.roundRect(r.x, r.y, r.w, r.h, size * 0.28);
+    ctx.fillStyle = style.fill;
+    ctx.shadowColor = COLORS.shadow;
+    ctx.shadowBlur = size * 0.4;
+    ctx.shadowOffsetY = size * 0.08;
+    ctx.fill();
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetY = 0;
+
+    // חור התלייה של התווית
+    ctx.beginPath();
+    ctx.arc(r.x + r.w - padX * 0.7 - holeR, r.y + r.h / 2, holeR, 0, Math.PI * 2);
+    ctx.fillStyle = COLORS.ink;
+    ctx.fill();
+
+    ctx.font = `700 ${size}px Rubik`;
+    ctx.direction = 'rtl';
+    ctx.fillStyle = COLORS.ink;
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, r.x + r.w - padX * 0.7 - holeR * 2 - holeGap, r.y + r.h / 2 + size * 0.04);
+
+    labelHits.push({ i: index, x: r.x, y: r.y, w: r.w, h: r.h });
+  }
+
+  /* ---------- הקפאה וסרגל כלים ---------- */
+  function showBar(name) {
+    barLive.hidden = name !== 'live';
+    barFrozen.hidden = name !== 'frozen';
+    barWhere.hidden = name !== 'where';
+  }
+
+  function updateFrozenTools() {
+    const ready = frozen && !frozenPending && frozenDetections.length > 0;
+    cardBtn.disabled = !(ready && selectedIndex >= 0);
+    whereSceneBtn.disabled = !ready || new Set(frozenDetections.map((d) => d.label)).size < 2;
+    nameSceneBtn.disabled = !ready;
+  }
+
+  function freeze() {
+    if (!video.videoWidth) return;
+    frozen = true;
+    freezeToken += 1;
+    liveToken += 1;
+    selectedIndex = -1;
+    selectedStyle = 'focus';
+    frozenDetections = [];
+    frozenPending = true;
+    whereScene = null;
+
+    frozenCanvas.width = video.videoWidth;
+    frozenCanvas.height = video.videoHeight;
+    frozenCtx.drawImage(video, 0, 0);
+
+    viewWrap.classList.add('is-frozen');
+    showBar('frozen');
+    updateFrozenTools();
+    refreshStatus();
+    drawFrozen();
+    detectFrozen(freezeToken);
+  }
+
+  function unfreeze() {
+    frozen = false;
+    freezeToken += 1;
+    liveToken += 1;
+    whereToken += 1;
+    selectedIndex = -1;
+    frozenPending = false;
+    whereScene = null;
+    liveDetections = [];
+    hasLiveResult = false;
+    window.speechSynthesis.cancel();
+
+    viewWrap.classList.remove('is-frozen');
+    showBar('live');
+    refreshStatus();
+    liveLoop();
+  }
+
+  /* ---------- נגיעה בחפץ ---------- */
+  function hitTest(event) {
+    const rect = view.getBoundingClientRect();
+    const px = (event.clientX - rect.left) * (view.width / rect.width);
+    const py = (event.clientY - rect.top) * (view.height / rect.height);
+
+    for (let k = labelHits.length - 1; k >= 0; k--) {
+      const t = labelHits[k];
+      if (px >= t.x && px <= t.x + t.w && py >= t.y && py <= t.y + t.h) return t.i;
+    }
+
+    const nx = (px - mapping.ox) / mapping.dw;
+    const ny = (py - mapping.oy) / mapping.dh;
+    let hit = -1;
+    let smallestArea = Infinity;
+    frozenDetections.forEach((d, i) => {
+      const area = (d.x2 - d.x1) * (d.y2 - d.y1);
+      if (nx >= d.x1 && nx <= d.x2 && ny >= d.y1 && ny <= d.y2 && area < smallestArea) {
+        smallestArea = area;
+        hit = i;
+      }
+    });
+    return hit;
+  }
+
+  function handleTap(event) {
+    if (!frozen || frozenPending) return;
+    const hit = hitTest(event);
+    if (whereScene) {
+      handleWhereSceneTap(hit);
+      return;
+    }
+    if (hit < 0) return;
+    selectedIndex = hit;
+    selectedStyle = 'focus';
+    updateFrozenTools();
+    drawFrozen();
+    speak(frozenDetections[hit].label);
+  }
+
+  function frozenCrop(d, maxSide) {
+    return cropCanvas(frozenCanvas, frozenCanvas.width, frozenCanvas.height, d, maxSide);
+  }
+
+  function openCardForSelected() {
+    const d = frozenDetections[selectedIndex];
+    const crop = frozenCrop(d, ALBUM_IMAGE_SIDE);
+    openWordCard({
+      label: d.label,
+      imageUrl: crop.toDataURL('image/jpeg', JPEG_QUALITY),
+      source: 'camera',
+      cropBlobPromise: canvasToBlob(crop)
+    });
+  }
+
+  /* ---------- "איפה?" על התמונה הקפואה ---------- */
+  function startWhereScene() {
+    whereScene = { labels: [...new Set(frozenDetections.map((d) => d.label))], lastLabel: null };
+    showBar('where');
+    refreshStatus();
+    nextWhereScene();
+  }
+
+  async function nextWhereScene() {
+    const token = ++whereToken;
+    const pool = whereScene.labels.filter((l) => l !== whereScene.lastLabel);
+    const target = pool[Math.floor(Math.random() * pool.length)];
+    whereScene = { ...whereScene, target, lastLabel: target, details: null, wrongTaps: 0, done: false };
+
+    selectedIndex = -1;
+    selectedStyle = 'focus';
+    drawFrozen();
+    whereQuestion.textContent = 'טוען שאלה…';
+    setMessage(whereFeedback, '');
+    whereFeedback.classList.remove('is-good');
+    whereRepeatBtn.disabled = true;
+    whereShowBtn.disabled = true;
+    whereShowBtn.hidden = false;
+    whereNextBtn.hidden = true;
+
+    try {
+      const details = await getWordDetails(target, (err) => {
+        if (token === whereToken) setMessage(whereFeedback, ...apiErrorText(err));
+      });
+      if (token !== whereToken || !whereScene) return;
+      whereScene.details = details;
+      whereQuestion.textContent = details.whereQuestionText;
+      setMessage(whereFeedback, '');
+      whereRepeatBtn.disabled = false;
+      whereShowBtn.disabled = false;
+      speak(details.whereQuestion);
+    } catch (err) {
+      if (token !== whereToken) return;
+      setMessage(whereFeedback, ...apiErrorText(err));
+    }
+  }
+
+  function finishWhereScene(outcome) {
+    whereScene.done = true;
+    whereShowBtn.hidden = true;
+    whereNextBtn.hidden = false;
+    recordAttempt({
+      mode: 'where',
+      source: 'camera',
+      word: whereScene.target,
+      outcome,
+      wrongTaps: whereScene.wrongTaps
+    }).then((err) => {
+      if (err) setMessage(whereFeedback, ...storageErrorText(err));
+    });
+  }
+
+  function handleWhereSceneTap(hit) {
+    if (!whereScene.details || whereScene.done || hit < 0) return;
+    const d = frozenDetections[hit];
+    selectedIndex = hit;
+
+    if (d.label === whereScene.target) {
+      selectedStyle = 'good';
+      drawFrozen();
+      whereFeedback.classList.add('is-good');
+      setMessage(whereFeedback, 'נכון!');
+      speak(whereScene.details.niqqud);
+      finishWhereScene(whereScene.wrongTaps === 0 ? 'first-try' : 'after-retry');
+    } else {
+      whereScene.wrongTaps += 1;
+      selectedStyle = 'miss';
+      drawFrozen();
+      whereFeedback.classList.remove('is-good');
+      setMessage(whereFeedback, `${d.label}. נסו שוב.`);
+      speak(d.label);
+    }
+  }
+
+  function showWhereSceneAnswer() {
+    if (!whereScene || !whereScene.details || whereScene.done) return;
+    let best = -1;
+    frozenDetections.forEach((d, i) => {
+      if (d.label !== whereScene.target) return;
+      const area = (d.x2 - d.x1) * (d.y2 - d.y1);
+      const bestArea = best < 0 ? -1 : (frozenDetections[best].x2 - frozenDetections[best].x1) * (frozenDetections[best].y2 - frozenDetections[best].y1);
+      if (area > bestArea) best = i;
+    });
+    selectedIndex = best;
+    selectedStyle = 'focus';
+    drawFrozen();
+    whereFeedback.classList.remove('is-good');
+    setMessage(whereFeedback, 'הנה זה.');
+    speak(whereScene.details.niqqud);
+    finishWhereScene('shown');
+  }
+
+  function endWhereScene() {
+    whereToken += 1;
+    whereScene = null;
+    selectedIndex = -1;
+    selectedStyle = 'focus';
+    window.speechSynthesis.cancel();
+    showBar('frozen');
+    updateFrozenTools();
+    refreshStatus();
+    drawFrozen();
+  }
+
+  /* ---------- "מה זה?" על התמונה הקפואה ---------- */
+  function startNamingScene() {
+    const seen = new Set();
+    const items = [];
+    frozenDetections
+      .slice()
+      .sort((a, b) => (b.x2 - b.x1) * (b.y2 - b.y1) - (a.x2 - a.x1) * (a.y2 - a.y1))
+      .forEach((d) => {
+        if (seen.has(d.label)) return;
+        seen.add(d.label);
+        items.push({ label: d.label, details: null, imageUrl: frozenCrop(d, ALBUM_IMAGE_SIDE).toDataURL('image/jpeg', JPEG_QUALITY) });
+      });
+    startNamingSession(shuffle(items).slice(0, SESSION_LENGTH), 'camera', 'camera');
+  }
+
+  homeCameraBtn.addEventListener('click', openCamera);
+  closeCameraBtn.addEventListener('click', closeCamera);
+  switchCameraBtn.addEventListener('click', switchCamera);
+  $('freezeBtn').addEventListener('click', freeze);
+  $('continueBtn').addEventListener('click', unfreeze);
+  cardBtn.addEventListener('click', openCardForSelected);
+  whereSceneBtn.addEventListener('click', startWhereScene);
+  nameSceneBtn.addEventListener('click', startNamingScene);
+  whereRepeatBtn.addEventListener('click', () => {
+    if (whereScene && whereScene.details) speak(whereScene.details.whereQuestion);
+  });
+  whereShowBtn.addEventListener('click', showWhereSceneAnswer);
+  whereNextBtn.addEventListener('click', nextWhereScene);
+  $('whereEndBtn').addEventListener('click', endWhereScene);
   view.addEventListener('click', handleTap);
+
+  /* ================= כרטיס מילה ================= */
+  const wordSheet = $('wordSheet');
+  const cardImage = $('cardImage');
+  const cardWord = $('cardWord');
+  const cardSyllables = $('cardSyllables');
+  const cardPhrasesTitle = $('cardPhrasesTitle');
+  const cardPhrases = $('cardPhrases');
+  const cardMsg = $('cardMsg');
+  const cardSaveBtn = $('cardSaveBtn');
+  const cardSaveLabel = $('cardSaveLabel');
+  const cardDeleteBtn = $('cardDeleteBtn');
+  const cardDeleteLabel = $('cardDeleteLabel');
+  let card = null;
+  let cardToken = 0;
+
+  function openWordCard({ label, imageUrl, source, albumItem, cropBlobPromise }) {
+    const token = ++cardToken;
+    card = { label, source, albumItem, cropBlobPromise, details: albumItem ? albumItem.details : null, confirmDelete: false };
+
+    cardImage.src = imageUrl;
+    cardWord.textContent = label;
+    cardSyllables.textContent = '';
+    cardPhrases.replaceChildren();
+    cardPhrasesTitle.hidden = true;
+    setMessage(cardMsg, '');
+    cardSaveBtn.hidden = source !== 'camera';
+    cardSaveBtn.disabled = true;
+    cardSaveLabel.textContent = 'שמירה לאלבום';
+    cardDeleteBtn.hidden = source !== 'album';
+    cardDeleteLabel.textContent = 'מחיקה מהאלבום';
+    wordSheet.hidden = false;
+    $('cardCloseBtn').focus();
+
+    if (card.details) {
+      fillWordCard(card.details);
+      return;
+    }
+
+    cardSyllables.textContent = 'טוען…';
+    getWordDetails(label, (err) => {
+      if (token === cardToken) setMessage(cardMsg, ...apiErrorText(err));
+    }).then((details) => {
+      if (token !== cardToken) return;
+      card.details = details;
+      setMessage(cardMsg, '');
+      fillWordCard(details);
+    }).catch((err) => {
+      if (token !== cardToken) return;
+      cardSyllables.textContent = '';
+      setMessage(cardMsg, ...apiErrorText(err));
+    });
+  }
+
+  function fillWordCard(details) {
+    cardWord.textContent = details.niqqud;
+    cardSyllables.textContent = formatSyllables(details);
+    cardPhrasesTitle.hidden = false;
+    cardPhrases.replaceChildren(...details.phrases.map((phrase) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'phrase-btn';
+      btn.append(icon('speaker'));
+      const span = document.createElement('span');
+      span.textContent = phrase.text;
+      btn.append(span);
+      btn.addEventListener('click', () => {
+        cardPhrases.querySelectorAll('.phrase-btn').forEach((b) => b.classList.toggle('is-active', b === btn));
+        speak(phrase.niqqud);
+      });
+      return btn;
+    }));
+    if (card.source === 'camera') cardSaveBtn.disabled = false;
+  }
+
+  function closeWordCard() {
+    if (wordSheet.hidden) return;
+    cardToken += 1;
+    card = null;
+    wordSheet.hidden = true;
+    window.speechSynthesis.cancel();
+  }
+
+  async function saveCardToAlbum() {
+    cardSaveBtn.disabled = true;
+    try {
+      const blob = await card.cropBlobPromise;
+      await db.add('album', { label: card.label, details: card.details, image: blob, createdAt: Date.now() });
+      cardSaveLabel.textContent = 'נשמר באלבום';
+    } catch (err) {
+      cardSaveBtn.disabled = false;
+      setMessage(cardMsg, ...storageErrorText(err));
+    }
+  }
+
+  async function deleteCardFromAlbum() {
+    if (!card.confirmDelete) {
+      card.confirmDelete = true;
+      cardDeleteLabel.textContent = 'לחצו שוב כדי למחוק';
+      return;
+    }
+    const id = card.albumItem.id;
+    try {
+      await db.remove('album', id);
+    } catch (err) {
+      setMessage(cardMsg, ...storageErrorText(err));
+      return;
+    }
+    closeWordCard();
+    forgetAlbumUrl(id);
+    showAlbum();
+  }
+
+  $('cardCloseBtn').addEventListener('click', closeWordCard);
+  $('cardSpeakBtn').addEventListener('click', () => {
+    if (card) speak(card.details ? card.details.niqqud : card.label);
+  });
+  cardSaveBtn.addEventListener('click', saveCardToAlbum);
+  cardDeleteBtn.addEventListener('click', deleteCardFromAlbum);
+  wordSheet.addEventListener('click', (event) => {
+    if (event.target === wordSheet) closeWordCard();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeWordCard();
+  });
+
+  /* ================= אלבום ================= */
+  const albumGrid = $('albumGrid');
+  const albumEmpty = $('albumEmpty');
+  const albumMsg = $('albumMsg');
+  const albumCounter = $('albumCounter');
+  const albumUrls = new Map();
+
+  function albumImageUrl(item) {
+    if (!albumUrls.has(item.id)) albumUrls.set(item.id, URL.createObjectURL(item.image));
+    return albumUrls.get(item.id);
+  }
+
+  function forgetAlbumUrl(id) {
+    const url = albumUrls.get(id);
+    if (!url) return;
+    URL.revokeObjectURL(url);
+    albumUrls.delete(id);
+  }
+
+  async function showAlbum() {
+    showScreen('album');
+    setMessage(albumMsg, '');
+    let items;
+    try {
+      items = await db.getAll('album');
+    } catch (err) {
+      albumGrid.replaceChildren();
+      albumEmpty.hidden = true;
+      setMessage(albumMsg, ...storageErrorText(err));
+      return;
+    }
+
+    items.sort((a, b) => b.createdAt - a.createdAt);
+    albumCounter.textContent = items.length ? String(items.length) : '';
+    albumEmpty.hidden = items.length > 0;
+    albumGrid.replaceChildren(...items.map((item) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'album-card';
+      const img = document.createElement('img');
+      img.src = albumImageUrl(item);
+      img.alt = '';
+      const span = document.createElement('span');
+      span.textContent = item.label;
+      btn.append(img, span);
+      btn.addEventListener('click', () => openWordCard({
+        label: item.label,
+        imageUrl: albumImageUrl(item),
+        source: 'album',
+        albumItem: item
+      }));
+      return btn;
+    }));
+  }
+
+  /* ================= בחירת תרגול ================= */
+  const practiceMsg = $('practiceMsg');
+  const startNamingBtn = $('startNamingBtn');
+  const startWhereBtn = $('startWhereBtn');
+  let session = null;
+
+  async function showPracticeMenu() {
+    showScreen('practice');
+    setMessage(practiceMsg, '');
+    startNamingBtn.disabled = true;
+    startWhereBtn.disabled = true;
+
+    let items;
+    try {
+      items = await db.getAll('album');
+    } catch (err) {
+      setMessage(practiceMsg, ...storageErrorText(err));
+      return;
+    }
+
+    const labelCount = new Set(items.map((i) => i.label)).size;
+    startNamingBtn.disabled = items.length === 0;
+    startWhereBtn.disabled = labelCount < 3;
+    if (items.length === 0) {
+      setMessage(practiceMsg, 'כדי לתרגל צריך קודם לשמור חפצים באלבום: במצלמה מקפיאים תמונה, נוגעים בחפץ, פותחים "כרטיס מילה" ושומרים.');
+    } else if (labelCount < 3) {
+      setMessage(practiceMsg, 'לתרגול "איפה?" צריך לפחות 3 מילים שונות באלבום.');
+    }
+  }
+
+  function groupByLabel(items) {
+    const groups = new Map();
+    for (const item of items) {
+      if (!groups.has(item.label)) groups.set(item.label, []);
+      groups.get(item.label).push(item);
+    }
+    return groups;
+  }
+
+  async function loadWordStats() {
+    const attempts = await db.getAll('attempts');
+    attempts.sort((a, b) => a.at - b.at);
+    const stats = new Map();
+    for (const a of attempts) {
+      if (!stats.has(a.word)) stats.set(a.word, []);
+      stats.get(a.word).push(OUTCOME_GROUP[a.outcome]);
+    }
+    return stats;
+  }
+
+  // מילים שקשות יותר, או שעוד לא תורגלו, מופיעות בתרגול לעתים קרובות יותר
+  function wordWeight(stats, label) {
+    const recent = (stats.get(label) || []).slice(-10);
+    if (recent.length === 0) return 3;
+    const alone = recent.filter((g) => g === 'alone').length;
+    return 1 + 3 * (1 - alone / recent.length);
+  }
+
+  function weightedPick(labels, weightOf) {
+    const total = labels.reduce((sum, l) => sum + weightOf(l), 0);
+    let r = Math.random() * total;
+    for (const l of labels) {
+      r -= weightOf(l);
+      if (r <= 0) return l;
+    }
+    return labels[labels.length - 1];
+  }
+
+  function randomItem(list) {
+    return list[Math.floor(Math.random() * list.length)];
+  }
+
+  async function loadPracticeData() {
+    try {
+      const [items, stats] = await Promise.all([db.getAll('album'), loadWordStats()]);
+      return { groups: groupByLabel(items), stats };
+    } catch (err) {
+      setMessage(practiceMsg, ...storageErrorText(err));
+      return null;
+    }
+  }
+
+  async function startAlbumNaming() {
+    const data = await loadPracticeData();
+    if (!data) return;
+    const pool = [...data.groups.keys()];
+    const chosen = [];
+    while (chosen.length < SESSION_LENGTH && pool.length) {
+      const label = weightedPick(pool, (l) => wordWeight(data.stats, l));
+      pool.splice(pool.indexOf(label), 1);
+      chosen.push(label);
+    }
+    const items = chosen.map((label) => {
+      const item = randomItem(data.groups.get(label));
+      return { label, details: item.details, imageUrl: albumImageUrl(item) };
+    });
+    startNamingSession(items, 'album', 'practice');
+  }
+
+  /* ================= תרגול: מה זה? ================= */
+  const namingCounter = $('namingCounter');
+  const namingImage = $('namingImage');
+  const namingWord = $('namingWord');
+  const namingFeedback = $('namingFeedback');
+  const namingActions = $('namingActions');
+  const namingDone = $('namingDone');
+  const micBtn = $('micBtn');
+  const micLabel = $('micLabel');
+  const hintBtn = $('hintBtn');
+  const namingNextLabel = $('namingNextLabel');
+  let naming = null;
+  let namingToken = 0;
+
+  function namingIdleText() {
+    return SpeechRecognitionCtor ? '' : 'אמרו את השם בקול, ואז לחצו "אמרתי נכון".';
+  }
+
+  function startNamingSession(items, source, origin) {
+    session = { mode: 'naming', source, origin, items, index: 0, results: [] };
+    showScreen('naming');
+    showNamingItem();
+  }
+
+  function setNamingWord(text, state) {
+    namingWord.textContent = text;
+    namingWord.classList.toggle('is-question', state === 'question');
+    namingWord.classList.toggle('is-good', state === 'good');
+  }
+
+  function showNamingItem() {
+    const item = session.items[session.index];
+    const token = ++namingToken;
+    naming = { item, cueLevel: 0, done: false, lastHeard: '', token };
+
+    namingCounter.textContent = `${session.index + 1} / ${session.items.length}`;
+    namingImage.src = item.imageUrl;
+    setNamingWord('?', 'question');
+    namingFeedback.classList.remove('is-good');
+    setMessage(namingFeedback, namingIdleText());
+    namingActions.hidden = false;
+    namingDone.hidden = true;
+    micBtn.hidden = !SpeechRecognitionCtor;
+    micBtn.disabled = false;
+    micBtn.classList.remove('is-listening');
+    micLabel.textContent = 'אני אגיד';
+    hintBtn.disabled = !item.details;
+
+    if (item.details) return;
+    getWordDetails(item.label, (err) => {
+      if (token === namingToken) setMessage(namingFeedback, ...apiErrorText(err));
+    }).then((details) => {
+      item.details = details;
+      if (token !== namingToken) return;
+      if (naming.done) {
+        setNamingWord(details.niqqud, namingWord.classList.contains('is-good') ? 'good' : '');
+      } else {
+        setMessage(namingFeedback, namingIdleText());
+        hintBtn.disabled = false;
+      }
+    }).catch((err) => {
+      if (token === namingToken) setMessage(namingFeedback, ...apiErrorText(err));
+    });
+  }
+
+  // רמזים בהדרגה: הצליל הראשון, ההברה הראשונה, ובסוף המילה כולה
+  function giveHint() {
+    const details = naming.item.details;
+    const syllables = details.syllables.flat();
+    let level = naming.cueLevel + 1;
+    if (level === 2 && (syllables.length === 1 || stripNiqqud(syllables[0]) === stripNiqqud(details.firstSound))) {
+      level = 3;
+    }
+    naming.cueLevel = level;
+
+    if (level === 1) {
+      setNamingWord(`${details.firstSound}…`, '');
+      speak(details.firstSound);
+    } else if (level === 2) {
+      setNamingWord(`${syllables[0]}…`, '');
+      speak(syllables[0]);
+    } else {
+      setNamingWord(details.niqqud, '');
+      speak(details.niqqud);
+      hintBtn.disabled = true;
+      setMessage(namingFeedback, 'עכשיו נסו להגיד בעצמכם.');
+    }
+  }
+
+  function outcomeForCue(level) {
+    if (level === 0) return 'independent';
+    return level < 3 ? 'cued' : 'repeated';
+  }
+
+  async function listenForName() {
+    const token = naming.token;
+    window.speechSynthesis.cancel();
+    micBtn.disabled = true;
+    micBtn.classList.add('is-listening');
+    micLabel.textContent = 'מקשיב…';
+    namingFeedback.classList.remove('is-good');
+    setMessage(namingFeedback, '');
+
+    let alternatives = null;
+    let errorCode = null;
+    try {
+      alternatives = await listenOnce();
+    } catch (code) {
+      errorCode = code;
+    }
+
+    if (token !== naming.token || naming.done) return;
+    micBtn.disabled = false;
+    micBtn.classList.remove('is-listening');
+    micLabel.textContent = 'אני אגיד';
+
+    if (errorCode) {
+      setMessage(namingFeedback, recognitionErrorText(errorCode));
+      return;
+    }
+    if (alternatives.length === 0) {
+      setMessage(namingFeedback, 'לא שמעתי. נסו שוב.');
+      return;
+    }
+    if (spokenMatches(alternatives, naming.item.label)) {
+      finishNaming(outcomeForCue(naming.cueLevel), alternatives[0]);
+      return;
+    }
+    naming.lastHeard = alternatives[0];
+    setMessage(namingFeedback, 'עוד לא. נסו שוב, או בקשו רמז.');
+    const heard = document.createElement('span');
+    heard.className = 'heard';
+    heard.textContent = `שמעתי: ${alternatives[0]}`;
+    namingFeedback.appendChild(heard);
+  }
+
+  function finishNaming(outcome, heard) {
+    stopListening();
+    naming.done = true;
+    const item = naming.item;
+    const word = item.details ? item.details.niqqud : item.label;
+    const success = outcome !== 'not-yet';
+
+    setNamingWord(word, success ? 'good' : '');
+    namingFeedback.classList.toggle('is-good', success);
+    setMessage(namingFeedback, success ? 'נכון!' : 'זו המילה. נתרגל אותה שוב.');
+    speak(word);
+
+    session.results.push(outcome);
+    recordAttempt({
+      mode: 'naming',
+      source: session.source,
+      word: item.label,
+      outcome,
+      cueLevel: naming.cueLevel,
+      heard: heard || naming.lastHeard
+    }).then((err) => {
+      if (err) setMessage(namingFeedback, ...storageErrorText(err));
+    });
+
+    namingActions.hidden = true;
+    namingDone.hidden = false;
+    namingNextLabel.textContent = session.index + 1 >= session.items.length ? 'לסיכום' : 'הבא';
+  }
+
+  function nextNaming() {
+    session.index += 1;
+    if (session.index >= session.items.length) showSummary();
+    else showNamingItem();
+  }
+
+  function endSession() {
+    namingToken += 1;
+    whereAlbumToken += 1;
+    if (session.results.length > 0) showSummary();
+    else leaveSession();
+  }
+
+  function leaveSession() {
+    const origin = session.origin;
+    session = null;
+    if (origin === 'camera') {
+      showScreen('camera');
+      refreshStatus();
+      drawFrozen();
+    } else {
+      showPracticeMenu();
+    }
+  }
+
+  micBtn.addEventListener('click', listenForName);
+  hintBtn.addEventListener('click', giveHint);
+  $('saidRightBtn').addEventListener('click', () => finishNaming(outcomeForCue(naming.cueLevel), ''));
+  $('skipBtn').addEventListener('click', () => finishNaming('not-yet', ''));
+  $('namingRepeatBtn').addEventListener('click', () => {
+    speak(naming.item.details ? naming.item.details.niqqud : naming.item.label);
+  });
+  $('namingNextBtn').addEventListener('click', nextNaming);
+  $('namingEndBtn').addEventListener('click', endSession);
+
+  /* ================= תרגול: איפה? (אלבום) ================= */
+  const whereAlbumCounter = $('whereAlbumCounter');
+  const whereAlbumQuestion = $('whereAlbumQuestion');
+  const choiceGrid = $('choiceGrid');
+  const whereAlbumFeedback = $('whereAlbumFeedback');
+  const whereAlbumShowBtn = $('whereAlbumShowBtn');
+  const whereAlbumNextBtn = $('whereAlbumNextBtn');
+  const whereAlbumNextLabel = $('whereAlbumNextLabel');
+  let whereAlbum = null;
+  let whereAlbumToken = 0;
+
+  async function startAlbumWhere() {
+    const data = await loadPracticeData();
+    if (!data) return;
+    session = {
+      mode: 'where',
+      source: 'album',
+      origin: 'practice',
+      groups: data.groups,
+      stats: data.stats,
+      index: 0,
+      total: SESSION_LENGTH,
+      results: [],
+      lastLabel: null
+    };
+    showScreen('where');
+    showWhereAlbumQuestion();
+  }
+
+  function showWhereAlbumQuestion() {
+    whereAlbumToken += 1;
+    const labels = [...session.groups.keys()];
+    const pool = labels.filter((l) => l !== session.lastLabel);
+    const target = weightedPick(pool, (l) => wordWeight(session.stats, l));
+    session.lastLabel = target;
+
+    const distractors = shuffle(labels.filter((l) => l !== target)).slice(0, 3);
+    const choices = shuffle([target, ...distractors]).map((label) => ({ label, item: randomItem(session.groups.get(label)) }));
+    const targetChoice = choices.find((c) => c.label === target);
+    whereAlbum = { target, targetItem: targetChoice.item, choices, wrongTaps: 0, done: false };
+
+    whereAlbumCounter.textContent = `${session.index + 1} / ${session.total}`;
+    whereAlbumQuestion.textContent = targetChoice.item.details.whereQuestionText;
+    whereAlbumFeedback.classList.remove('is-good');
+    setMessage(whereAlbumFeedback, '');
+    whereAlbumShowBtn.hidden = false;
+    whereAlbumNextBtn.hidden = true;
+
+    choiceGrid.replaceChildren(...choices.map((choice, i) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'choice';
+      btn.setAttribute('aria-label', `תמונה ${i + 1}`);
+      const img = document.createElement('img');
+      img.src = albumImageUrl(choice.item);
+      img.alt = '';
+      btn.append(img);
+      btn.addEventListener('click', () => chooseWhereAlbum(choice, btn));
+      choice.button = btn;
+      return btn;
+    }));
+
+    speak(targetChoice.item.details.whereQuestion);
+  }
+
+  function finishWhereAlbum(outcome) {
+    whereAlbum.done = true;
+    whereAlbumShowBtn.hidden = true;
+    whereAlbumNextBtn.hidden = false;
+    whereAlbumNextLabel.textContent = session.index + 1 >= session.total ? 'לסיכום' : 'הבא';
+    session.results.push(outcome);
+    recordAttempt({
+      mode: 'where',
+      source: 'album',
+      word: whereAlbum.target,
+      outcome,
+      wrongTaps: whereAlbum.wrongTaps
+    }).then((err) => {
+      if (err) setMessage(whereAlbumFeedback, ...storageErrorText(err));
+    });
+  }
+
+  function chooseWhereAlbum(choice, btn) {
+    if (whereAlbum.done || btn.classList.contains('is-wrong')) return;
+    if (choice.label === whereAlbum.target) {
+      btn.classList.add('is-correct');
+      whereAlbumFeedback.classList.add('is-good');
+      setMessage(whereAlbumFeedback, `נכון! ${choice.label}`);
+      speak(choice.item.details.niqqud);
+      finishWhereAlbum(whereAlbum.wrongTaps === 0 ? 'first-try' : 'after-retry');
+    } else {
+      whereAlbum.wrongTaps += 1;
+      btn.classList.add('is-wrong');
+      whereAlbumFeedback.classList.remove('is-good');
+      setMessage(whereAlbumFeedback, `${choice.label}. נסו שוב.`);
+      speak(choice.item.details.niqqud);
+    }
+  }
+
+  function showWhereAlbumAnswer() {
+    if (whereAlbum.done) return;
+    const choice = whereAlbum.choices.find((c) => c.label === whereAlbum.target);
+    choice.button.classList.add('is-correct');
+    whereAlbumFeedback.classList.remove('is-good');
+    setMessage(whereAlbumFeedback, `הנה ${choice.label}.`);
+    speak(choice.item.details.niqqud);
+    finishWhereAlbum('shown');
+  }
+
+  function nextWhereAlbum() {
+    session.index += 1;
+    if (session.index >= session.total) showSummary();
+    else showWhereAlbumQuestion();
+  }
+
+  $('whereAlbumRepeatBtn').addEventListener('click', () => speak(whereAlbum.targetItem.details.whereQuestion));
+  whereAlbumShowBtn.addEventListener('click', showWhereAlbumAnswer);
+  whereAlbumNextBtn.addEventListener('click', nextWhereAlbum);
+  $('whereAlbumEndBtn').addEventListener('click', endSession);
+
+  /* ================= סיכום ================= */
+  const summaryStats = $('summaryStats');
+
+  function showSummary() {
+    const counts = { alone: 0, helped: 0, notyet: 0 };
+    session.results.forEach((outcome) => { counts[OUTCOME_GROUP[outcome]] += 1; });
+    const texts = session.mode === 'naming'
+      ? { alone: 'אמרתם לבד', helped: 'אמרתם עם עזרה', notyet: 'נתרגל שוב' }
+      : { alone: 'מצאתם מיד', helped: 'מצאתם אחרי כמה ניסיונות', notyet: 'נתרגל שוב' };
+
+    summaryStats.replaceChildren(...['alone', 'helped', 'notyet'].map((group) => {
+      const row = document.createElement('div');
+      row.className = 'summary-row';
+      const swatch = document.createElement('i');
+      swatch.className = `swatch c-${group}`;
+      const label = document.createElement('span');
+      label.textContent = texts[group];
+      const value = document.createElement('b');
+      value.textContent = String(counts[group]);
+      row.append(swatch, label, value);
+      return row;
+    }));
+    showScreen('summary');
+  }
+
+  $('summaryAgainBtn').addEventListener('click', () => {
+    const { mode, origin } = session;
+    session = null;
+    if (origin === 'camera') startNamingScene();
+    else if (mode === 'naming') startAlbumNaming();
+    else startAlbumWhere();
+  });
+  $('summaryBackBtn').addEventListener('click', leaveSession);
+
+  /* ================= התקדמות ================= */
+  const rangeSelect = $('rangeSelect');
+  const progressEmpty = $('progressEmpty');
+  const progressBody = $('progressBody');
+  const progressStats = $('progressStats');
+  const progressChart = $('progressChart');
+  const progressModes = $('progressModes');
+  const progressWords = $('progressWords');
+  const progressMsg = $('progressMsg');
+  const clearHistoryLabel = $('clearHistoryLabel');
+  let progressRange = '7';
+  let allAttempts = [];
+  let confirmClear = false;
+
+  async function showProgress() {
+    showScreen('progress');
+    confirmClear = false;
+    clearHistoryLabel.textContent = 'מחיקת היסטוריית התרגול';
+    setMessage(progressMsg, '');
+    try {
+      allAttempts = await db.getAll('attempts');
+    } catch (err) {
+      allAttempts = [];
+      setMessage(progressMsg, ...storageErrorText(err));
+    }
+    renderProgress();
+  }
+
+  function percent(part, total) {
+    return total === 0 ? 0 : Math.round((part / total) * 100);
+  }
+
+  function countGroups(attempts) {
+    const counts = { alone: 0, helped: 0, notyet: 0 };
+    attempts.forEach((a) => { counts[OUTCOME_GROUP[a.outcome]] += 1; });
+    return counts;
+  }
+
+  function meter(counts, total) {
+    const el = document.createElement('div');
+    el.className = 'meter';
+    ['alone', 'helped', 'notyet'].forEach((group) => {
+      const part = document.createElement('i');
+      part.className = `c-${group}`;
+      part.style.width = `${percent(counts[group], total)}%`;
+      el.append(part);
+    });
+    return el;
+  }
+
+  function dataRow(title, rate, detail, counts, total) {
+    const row = document.createElement('div');
+    row.className = 'data-row';
+    const b = document.createElement('b');
+    b.textContent = title;
+    const r = document.createElement('span');
+    r.className = 'rate';
+    r.textContent = rate;
+    const d = document.createElement('span');
+    d.className = 'detail';
+    d.textContent = detail;
+    row.append(b, r, meter(counts, total), d);
+    return row;
+  }
+
+  function renderProgress() {
+    rangeSelect.querySelectorAll('button').forEach((btn) => {
+      btn.setAttribute('aria-pressed', String(btn.dataset.value === progressRange));
+    });
+
+    const today = startOfDay(Date.now());
+    const since = progressRange === 'all' ? 0 : today - (Number(progressRange) - 1) * DAY_MS;
+    const attempts = allAttempts.filter((a) => a.at >= since).sort((a, b) => a.at - b.at);
+
+    progressEmpty.hidden = attempts.length > 0;
+    progressBody.hidden = attempts.length === 0;
+    if (attempts.length === 0) return;
+
+    const totals = countGroups(attempts);
+    const statTexts = { alone: 'לבד', helped: 'עם עזרה', notyet: 'עדיין לא' };
+    progressStats.replaceChildren(...['alone', 'helped', 'notyet'].map((group) => {
+      const stat = document.createElement('div');
+      stat.className = 'stat';
+      const swatch = document.createElement('i');
+      swatch.className = `c-${group}`;
+      const value = document.createElement('b');
+      value.textContent = `${percent(totals[group], attempts.length)}%`;
+      const label = document.createElement('span');
+      label.textContent = statTexts[group];
+      const count = document.createElement('span');
+      count.textContent = `${totals[group]} מתוך ${attempts.length}`;
+      stat.append(swatch, value, label, count);
+      return stat;
+    }));
+
+    renderChart(attempts, today);
+
+    progressModes.replaceChildren(...['naming', 'where'].map((mode) => {
+      const list = attempts.filter((a) => a.mode === mode);
+      const counts = countGroups(list);
+      const detail = list.length === 0
+        ? 'עדיין לא תורגל בטווח הזה.'
+        : `${list.length} תרגולים. לבד: ${counts.alone}, עם עזרה: ${counts.helped}, עדיין לא: ${counts.notyet}.`;
+      return dataRow(MODE_TEXT[mode], `${percent(counts.alone, list.length)}% לבד`, detail, counts, list.length);
+    }));
+
+    const words = new Map();
+    for (const a of attempts) {
+      if (!words.has(a.word)) words.set(a.word, []);
+      words.get(a.word).push(a);
+    }
+    const wordRows = [...words.entries()].map(([word, list]) => ({ word, list, counts: countGroups(list) }));
+    wordRows.sort((a, b) => percent(a.counts.alone, a.list.length) - percent(b.counts.alone, b.list.length) || b.list.length - a.list.length);
+    progressWords.replaceChildren(...wordRows.map(({ word, list, counts }) => {
+      const last = list[list.length - 1].at;
+      const detail = `${list.length} תרגולים. תרגול אחרון: ${dateFormat.format(last)}.`;
+      return dataRow(word, `${percent(counts.alone, list.length)}% לבד`, detail, counts, list.length);
+    }));
+  }
+
+  function renderChart(attempts, today) {
+    const firstDay = startOfDay(attempts[0].at);
+    const dayCount = progressRange === 'all'
+      ? Math.min(60, Math.round((today - firstDay) / DAY_MS) + 1)
+      : Number(progressRange);
+    const days = Array.from({ length: dayCount }, (_, i) => {
+      const start = today - (dayCount - 1 - i) * DAY_MS;
+      return { start, counts: countGroups(attempts.filter((a) => a.at >= start && a.at < start + DAY_MS)) };
+    });
+
+    const W = 640;
+    const H = 230;
+    const top = 16;
+    const bottom = 34;
+    const plotH = H - top - bottom;
+    const max = Math.max(1, ...days.map((d) => d.counts.alone + d.counts.helped + d.counts.notyet));
+    const slot = W / dayCount;
+    const barW = Math.max(4, Math.min(40, slot * 0.64));
+    const labelEvery = Math.ceil(dayCount / 10);
+    const colors = { alone: '#6FD08C', helped: '#FFD23F', notyet: '#5E8A95' };
+    const ns = 'http://www.w3.org/2000/svg';
+
+    const svg = document.createElementNS(ns, 'svg');
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-label', 'מספר התרגולים בכל יום לפי תוצאה');
+
+    const axis = document.createElementNS(ns, 'line');
+    axis.setAttribute('x1', '0');
+    axis.setAttribute('x2', String(W));
+    axis.setAttribute('y1', String(top + plotH));
+    axis.setAttribute('y2', String(top + plotH));
+    axis.setAttribute('stroke', '#2A5A67');
+    axis.setAttribute('stroke-width', '2');
+    svg.append(axis);
+
+    // ציר הזמן מימין לשמאל: הימים הישנים בצד ימין
+    days.forEach((day, i) => {
+      const cx = W - slot * (i + 0.5);
+      let y = top + plotH;
+      ['alone', 'helped', 'notyet'].forEach((group) => {
+        const value = day.counts[group];
+        if (!value) return;
+        const h = (value / max) * plotH;
+        y -= h;
+        const rect = document.createElementNS(ns, 'rect');
+        rect.setAttribute('x', String(cx - barW / 2));
+        rect.setAttribute('y', String(y));
+        rect.setAttribute('width', String(barW));
+        rect.setAttribute('height', String(h));
+        rect.setAttribute('fill', colors[group]);
+        svg.append(rect);
+      });
+
+      if ((dayCount - 1 - i) % labelEvery === 0) {
+        const text = document.createElementNS(ns, 'text');
+        const date = new Date(day.start);
+        text.setAttribute('x', String(cx));
+        text.setAttribute('y', String(H - 10));
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('fill', '#CFE3E6');
+        text.setAttribute('font-size', '15');
+        text.textContent = `${date.getDate()}.${date.getMonth() + 1}`;
+        svg.append(text);
+      }
+    });
+
+    const maxLabel = document.createElementNS(ns, 'text');
+    maxLabel.setAttribute('x', String(W - 4));
+    maxLabel.setAttribute('y', String(top + 4));
+    // הדף מימין לשמאל, ולכן start מצמיד את הטקסט לקצה הימני
+    maxLabel.setAttribute('text-anchor', 'start');
+    maxLabel.setAttribute('fill', '#CFE3E6');
+    maxLabel.setAttribute('font-size', '14');
+    maxLabel.textContent = `${max} תרגולים`;
+    svg.append(maxLabel);
+
+    progressChart.replaceChildren(svg);
+  }
+
+  function csvCell(value) {
+    return `"${String(value).replace(/"/g, '""')}"`;
+  }
+
+  function exportCsv() {
+    if (allAttempts.length === 0) {
+      setMessage(progressMsg, 'אין עדיין תרגולים לייצוא.');
+      return;
+    }
+    const header = ['תאריך', 'שעה', 'סוג תרגול', 'מקור', 'מילה', 'תוצאה', 'רמזים', 'בחירות שגויות', 'מה זיהוי הדיבור שמע'];
+    const rows = allAttempts
+      .slice()
+      .sort((a, b) => a.at - b.at)
+      .map((a) => [
+        dateFormat.format(a.at),
+        timeFormat.format(a.at),
+        MODE_TEXT[a.mode],
+        SOURCE_TEXT[a.source],
+        a.word,
+        OUTCOME_TEXT[a.outcome],
+        a.mode === 'naming' ? a.cueLevel : '',
+        a.mode === 'where' ? a.wrongTaps : '',
+        a.heard
+      ]);
+    const csv = [header, ...rows].map((row) => row.map(csvCell).join(',')).join('\r\n');
+    const blob = new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const now = new Date();
+    link.href = url;
+    link.download = `ma-ze-progress-${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}.csv`;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  async function clearHistory() {
+    if (!confirmClear) {
+      confirmClear = true;
+      clearHistoryLabel.textContent = 'לחצו שוב כדי למחוק את כל ההיסטוריה';
+      return;
+    }
+    try {
+      await db.clear('attempts');
+    } catch (err) {
+      setMessage(progressMsg, ...storageErrorText(err));
+      return;
+    }
+    confirmClear = false;
+    clearHistoryLabel.textContent = 'מחיקת היסטוריית התרגול';
+    allAttempts = [];
+    setMessage(progressMsg, 'ההיסטוריה נמחקה.');
+    renderProgress();
+  }
+
+  rangeSelect.addEventListener('click', (event) => {
+    const btn = event.target.closest('button');
+    if (!btn) return;
+    progressRange = btn.dataset.value;
+    renderProgress();
+  });
+  $('exportBtn').addEventListener('click', exportCsv);
+  $('clearHistoryBtn').addEventListener('click', clearHistory);
+
+  /* ================= הפעלה ================= */
+  $('homePracticeBtn').addEventListener('click', showPracticeMenu);
+  $('homeAlbumBtn').addEventListener('click', showAlbum);
+  $('homeProgressBtn').addEventListener('click', showProgress);
+  $('homeSettingsBtn').addEventListener('click', showSettings);
+  startNamingBtn.addEventListener('click', startAlbumNaming);
+  startWhereBtn.addEventListener('click', startAlbumWhere);
+
+  mountIcons(document);
+  applySettings();
 
   try {
     apiKey = window.localStorage.getItem(STORAGE_KEY) || '';
@@ -1210,10 +4005,11 @@
     apiKey = '';
   }
 
-  if (apiKey) {
-    startScreen.hidden = false;
-  } else {
-    showSetupScreen();
+  if (apiKey) showScreen('home');
+  else showSetupScreen('home');
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch((err) => console.error('Service worker registration failed:', err));
   }
 })();
 </script>
