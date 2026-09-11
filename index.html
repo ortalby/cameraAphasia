@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>מה זה?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0D2B33;
+    --ink-deep: #081E24;
+    --ink-soft: #1B4652;
+    --tag: #FFD23F;
+    --paper: #FFFFFF;
+    --mist: #CFE3E6;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Rubik', sans-serif;
+    direction: rtl;
+    text-align: right;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  [hidden] { display: none !important; }
+
+  #app {
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ---------- מסך פתיחה ---------- */
+  .start {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 48px;
+    padding: 24px;
+    text-align: center;
+  }
+
+  .start h1 {
+    margin: 0;
+    font-weight: 700;
+    font-size: clamp(64px, 18vw, 140px);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--tag);
+    position: relative;
+    padding: 0.12em 0.45em 0.18em 0.6em;
+    background: var(--ink-soft);
+    border-radius: 0.18em;
+  }
+
+  /* חור התלייה של התווית – מופיע בצד ימין בגלל RTL */
+  .start h1::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 0.18em;
+    width: 0.12em;
+    height: 0.12em;
+    border-radius: 50%;
+    background: var(--ink);
+    transform: translateY(-50%);
+  }
+
+  .msg {
+    margin: 0;
+    max-width: 30ch;
+    font-size: 22px;
+    line-height: 1.45;
+    color: var(--mist);
+    text-align: center;
+  }
+
+  .msg:empty { display: none; }
+
+  /* ---------- כפתורים ---------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    border: 0;
+    border-radius: 24px;
+    font-family: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    color: var(--ink);
+    background: var(--tag);
+    touch-action: manipulation;
+  }
+
+  .btn:active { transform: scale(0.97); }
+
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+    transform: none;
+  }
+
+  .btn:focus-visible {
+    outline: 4px solid var(--paper);
+    outline-offset: 4px;
+  }
+
+  .btn svg {
+    flex-shrink: 0;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .btn-huge {
+    min-height: 120px;
+    min-width: min(360px, 100%);
+    padding: 20px 28px;
+    font-size: 36px;
+    white-space: nowrap;
+  }
+
+  .btn-huge svg { width: 56px; height: 56px; }
+
+  .btn-wide {
+    width: 100%;
+    max-width: 520px;
+    min-height: 96px;
+    padding: 16px 32px;
+    font-size: 34px;
+  }
+
+  .btn-wide svg { width: 48px; height: 48px; }
+
+  .start { position: relative; }
+
+  .settings-link {
+    position: absolute;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 8px 16px;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--mist);
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: 500;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .settings-link svg {
+    width: 22px;
+    height: 22px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .settings-link:focus-visible {
+    outline: 3px solid var(--paper);
+    outline-offset: 2px;
+  }
+
+  /* ---------- מסך הגדרת מפתח ---------- */
+  .setup {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    overflow-y: auto;
+  }
+
+  .setup-panel {
+    width: 100%;
+    max-width: 520px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .setup-panel h2 {
+    margin: 0;
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--tag);
+  }
+
+  .setup-panel p {
+    margin: 0;
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--mist);
+  }
+
+  .setup-panel a {
+    color: var(--tag);
+    text-underline-offset: 3px;
+  }
+
+  .field-label {
+    font-size: 19px;
+    font-weight: 500;
+    color: var(--paper);
+  }
+
+  .key-input {
+    width: 100%;
+    min-height: 64px;
+    padding: 14px 18px;
+    border: 2px solid var(--ink-soft);
+    border-radius: 16px;
+    background: var(--ink-deep);
+    color: var(--paper);
+    font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+    font-size: 20px;
+    direction: ltr;
+    text-align: left;
+  }
+
+  .key-input:focus {
+    outline: none;
+    border-color: var(--tag);
+  }
+
+  .setup-panel .setup-msg {
+    min-height: 1.55em;
+    color: var(--paper);
+  }
+
+  .setup-panel .setup-msg bdi {
+    display: block;
+    margin-top: 4px;
+    color: var(--mist);
+    font-size: 16px;
+  }
+
+  .setup-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .setup-actions .btn-wide {
+    flex: 1 1 100%;
+    max-width: none;
+    min-height: 80px;
+    font-size: 30px;
+  }
+
+  .btn-quiet {
+    flex: 1 1 0;
+    min-height: 60px;
+    padding: 12px 20px;
+    font-size: 22px;
+    color: var(--mist);
+    background: transparent;
+    border: 2px solid var(--ink-soft);
+  }
+
+  /* ---------- מסך מצלמה ---------- */
+  .camera {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .view-wrap {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    background: var(--ink-deep);
+    overflow: hidden;
+  }
+
+  .view-wrap video,
+  .view-wrap canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .view-wrap video { object-fit: cover; }
+
+  .view-wrap canvas { touch-action: manipulation; }
+
+  .view-wrap.is-frozen canvas { cursor: pointer; }
+
+  .status {
+    position: absolute;
+    top: max(16px, env(safe-area-inset-top));
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: calc(100% - 32px);
+    padding: 12px 22px;
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 1.3;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .status.is-error {
+    display: block;
+    width: max-content;
+    white-space: normal;
+    border-radius: 20px;
+    font-size: 20px;
+    text-align: center;
+  }
+
+  .status:empty { display: none; }
+
+  .status svg {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    stroke: var(--tag);
+    fill: none;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .bar {
+    display: flex;
+    justify-content: center;
+    padding: 16px 16px max(16px, env(safe-area-inset-bottom));
+    background: var(--ink);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn:active { transform: none; }
+  }
+</style>
+</head>
+<body>
+<main id="app">
+
+  <section id="startScreen" class="start" hidden>
+    <h1>מה זה?</h1>
+    <button id="openBtn" class="btn btn-huge" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.8l1.4-2h6.6l1.4 2h1.8A2.5 2.5 0 0 1 21 8.5v9A2.5 2.5 0 0 1 18.5 20h-13A2.5 2.5 0 0 1 3 17.5z"/>
+        <circle cx="12" cy="13" r="3.8"/>
+      </svg>
+      <span>פתח מצלמה</span>
+    </button>
+    <p id="startMsg" class="msg" role="alert"></p>
+    <button id="settingsBtn" class="settings-link" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1.03H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1.1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/>
+      </svg>
+      <span>הגדרות</span>
+    </button>
+  </section>
+
+  <section id="setupScreen" class="setup" hidden>
+    <div class="setup-panel">
+      <h2>מפתח Gemini</h2>
+      <p>כדי לזהות חפצים האפליקציה צריכה מפתח API חינמי של Google. מוציאים אותו ב-<a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener"><bdi>aistudio.google.com/apikey</bdi></a>. המפתח נשמר רק בדפדפן של המכשיר הזה.</p>
+      <p id="savedKeyInfo" hidden></p>
+      <label class="field-label" for="keyInput">הדביקו כאן את המפתח</label>
+      <input id="keyInput" class="key-input" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <p id="setupMsg" class="setup-msg" role="alert"></p>
+      <div class="setup-actions">
+        <button id="saveKeyBtn" class="btn btn-wide" type="button">שמור מפתח</button>
+        <button id="backBtn" class="btn btn-quiet" type="button" hidden>חזרה</button>
+        <button id="deleteKeyBtn" class="btn btn-quiet" type="button" hidden>מחק מפתח</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="cameraScreen" class="camera" hidden>
+    <div id="viewWrap" class="view-wrap">
+      <video id="video" playsinline muted></video>
+      <canvas id="view" aria-label="תמונת המצלמה עם שמות החפצים"></canvas>
+      <div id="status" class="status" aria-live="polite"></div>
+    </div>
+    <div class="bar">
+      <button id="freezeBtn" class="btn btn-wide" type="button">
+        <svg id="iconPause" viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="6" y="4.5" width="4" height="15" rx="1.2"/>
+          <rect x="14" y="4.5" width="4" height="15" rx="1.2"/>
+        </svg>
+        <svg id="iconPlay" viewBox="0 0 24 24" aria-hidden="true" hidden>
+          <path d="M17.5 5.2v13.6a1 1 0 0 1-1.5.86L5.6 13.1a1.3 1.3 0 0 1 0-2.2L16 4.34a1 1 0 0 1 1.5.86z"/>
+        </svg>
+        <span id="freezeLabel">הקפא</span>
+      </button>
+    </div>
+  </section>
+
+</main>
+
+<script>
+(() => {
+  'use strict';
+
+  /* ================= הגדרות Gemini ================= */
+  // המפתח מוזן במסך ההגדרות ונשמר בדפדפן של המכשיר
+  const STORAGE_KEY = 'ma-ze.geminiApiKey';
+  const GEMINI_MODEL = 'gemini-3.8-flash';
+  const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+
+  // המכסה לדקה של הפרויקט שלכם מופיעה ב-https://aistudio.google.com/rate-limit
+  const REQUESTS_PER_MINUTE = 10;
+  // בקשות שנשמרות בכל דקה לזיהוי תמונה קפואה, כדי שלא תצטרך לחכות לתור
+  const FREEZE_RESERVE = 2;
+  const LIVE_INTERVAL_MS = 60000 / (REQUESTS_PER_MINUTE - FREEZE_RESERVE);
+
+  const RETRY_AFTER_ERROR_MS = 5000;
+  const CSP_TEXT = 'האתר חוסם פניות ל-Gemini. באתרי Neocities חינמיים חדשים הדפדפן לא מורשה לפנות לשרתים חיצוניים, ורק מנוי Supporter מסיר את החסימה.';
+  const QUOTA_WAIT_MS = 60000;
+  const MAX_UPLOAD_SIDE = 1024;
+  const JPEG_QUALITY = 0.85;
+  const SPEECH_RATE = 0.85;
+
+  const SYSTEM_PROMPT = [
+    'You are the vision engine of an assistive app for a person with aphasia whose language is Hebrew.',
+    'Detect every distinct, clearly visible object in the image: people, furniture, food, dishes, tools, clothing, animals, plants, devices, vehicles, household items and anything else a person could name.',
+    'Return at most 20 objects, preferring the larger and more prominent ones.',
+    'Do not return a part of an object that is already returned as a whole, and never return the same object twice.',
+    'For each object return:',
+    '- box_2d: [ymin, xmin, ymax, xmax] normalized to 0-1000, tightly enclosing the object.',
+    '- label: the most common everyday Modern Hebrew noun for the object, the word an Israeli would say at home. Singular, one to three words, no definite article (ה), no niqqud, no colors, no brands, no descriptions.',
+    'If there are no identifiable objects, return an empty array.'
+  ].join('\n');
+
+  const USER_PROMPT = 'Detect the objects in this image.';
+
+  const RESPONSE_SCHEMA = {
+    type: 'ARRAY',
+    items: {
+      type: 'OBJECT',
+      properties: {
+        box_2d: { type: 'ARRAY', items: { type: 'INTEGER' } },
+        label: { type: 'STRING' }
+      },
+      required: ['box_2d', 'label'],
+      propertyOrdering: ['box_2d', 'label']
+    }
+  };
+
+  /* ================= עיצוב הציור ================= */
+  const COLORS = {
+    ink: '#0D2B33',
+    inkDeep: '#081E24',
+    tag: '#FFD23F',
+    paper: '#FFFFFF',
+    boxShadow: 'rgba(8, 30, 36, 0.6)',
+    selectedFill: 'rgba(255, 210, 63, 0.18)'
+  };
+
+  const ICONS = {
+    hand: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V10"/><path d="M12 10V4.5a1.5 1.5 0 0 1 3 0V10"/><path d="M15 10V6.5a1.5 1.5 0 0 1 3 0V14a7 7 0 0 1-7 7h-.6a6 6 0 0 1-4.9-2.5L3.3 15a1.5 1.5 0 0 1 2.3-1.9L9 16V11"/></svg>',
+    wait: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+    empty: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>'
+  };
+
+  /* ================= אלמנטים ================= */
+  const startScreen = document.getElementById('startScreen');
+  const cameraScreen = document.getElementById('cameraScreen');
+  const openBtn = document.getElementById('openBtn');
+  const startMsg = document.getElementById('startMsg');
+  const settingsBtn = document.getElementById('settingsBtn');
+  const setupScreen = document.getElementById('setupScreen');
+  const savedKeyInfo = document.getElementById('savedKeyInfo');
+  const keyInput = document.getElementById('keyInput');
+  const setupMsg = document.getElementById('setupMsg');
+  const saveKeyBtn = document.getElementById('saveKeyBtn');
+  const backBtn = document.getElementById('backBtn');
+  const deleteKeyBtn = document.getElementById('deleteKeyBtn');
+  const viewWrap = document.getElementById('viewWrap');
+  const video = document.getElementById('video');
+  const view = document.getElementById('view');
+  const ctx = view.getContext('2d');
+  const statusEl = document.getElementById('status');
+  const freezeBtn = document.getElementById('freezeBtn');
+  const freezeLabel = document.getElementById('freezeLabel');
+  const iconPause = document.getElementById('iconPause');
+  const iconPlay = document.getElementById('iconPlay');
+
+  const frozenCanvas = document.createElement('canvas');
+  const frozenCtx = frozenCanvas.getContext('2d');
+  const uploadCanvas = document.createElement('canvas');
+  const uploadCtx = uploadCanvas.getContext('2d');
+
+  /* ================= מצב ================= */
+  let frozen = false;
+  let freezeToken = 0;
+  let liveToken = 0;
+  let liveDetections = [];
+  let hasLiveResult = false;
+  let frozenDetections = [];
+  let frozenPending = false;
+  let selectedIndex = -1;
+  let labelHits = [];
+  let mapping = { ox: 0, oy: 0, dw: 1, dh: 1 };
+  let liveLoopRunning = false;
+  let fatalError = null;
+  let transientError = null;
+  let blockedUntil = 0;
+  const requestTimes = [];
+  let hebrewVoice = null;
+  let apiKey = '';
+  let cspBlocked = false;
+
+  /* ================= דיבור ================= */
+  function pickHebrewVoice() {
+    const voices = window.speechSynthesis.getVoices();
+    const match = voices.find((v) => {
+      const lang = v.lang.toLowerCase();
+      return lang.startsWith('he') || lang.startsWith('iw');
+    });
+    if (match) hebrewVoice = match;
+  }
+
+  window.speechSynthesis.addEventListener('voiceschanged', pickHebrewVoice);
+  pickHebrewVoice();
+
+  function speak(text) {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'he-IL';
+    if (hebrewVoice) utterance.voice = hebrewVoice;
+    utterance.rate = SPEECH_RATE;
+    window.speechSynthesis.speak(utterance);
+  }
+
+  /* ================= Gemini ================= */
+  class ApiError extends Error {
+    constructor(kind, retryAfterMs, detail) {
+      super(kind);
+      this.kind = kind;
+      this.retryAfterMs = retryAfterMs;
+      this.detail = detail;
+    }
+  }
+
+  function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  // אתרים עם Content-Security-Policy שחוסם connect-src (למשל Neocities חינמי) חוסמים את הפנייה ל-Gemini
+  document.addEventListener('securitypolicyviolation', (event) => {
+    if (event.effectiveDirective === 'connect-src' &&
+        event.blockedURI.startsWith('https://generativelanguage.googleapis.com')) {
+      cspBlocked = true;
+    }
+  });
+
+  async function connectionFailure() {
+    await sleep(100);
+    return cspBlocked ? new ApiError('csp', 0) : new ApiError('network', RETRY_AFTER_ERROR_MS);
+  }
+
+  async function readJson(response) {
+    try {
+      return await response.json();
+    } catch (err) {
+      return null;
+    }
+  }
+
+  async function verifyKey(key) {
+    let response;
+    try {
+      response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}`, {
+        headers: { 'x-goog-api-key': key }
+      });
+    } catch (err) {
+      return connectionFailure();
+    }
+    if (response.ok) return null;
+    const error = errorFromResponse(response.status, await readJson(response));
+    return error.kind === 'quota' ? null : error;
+  }
+
+  // תור בקשות לפי המכסה לדקה ולפי זמן ההמתנה שביקש Google
+  async function acquireSlot(limit, isWanted) {
+    for (;;) {
+      if (!isWanted()) return false;
+      const now = Date.now();
+      while (requestTimes.length && now - requestTimes[0] >= 60000) requestTimes.shift();
+      const windowWait = requestTimes.length >= limit ? requestTimes[0] + 60000 - now : 0;
+      const wait = Math.max(blockedUntil - now, windowWait);
+      if (wait <= 0) {
+        requestTimes.push(now);
+        return true;
+      }
+      await sleep(Math.min(wait, 250));
+    }
+  }
+
+  function encodeFrame(source, sw, sh) {
+    const scale = Math.min(1, MAX_UPLOAD_SIDE / Math.max(sw, sh));
+    uploadCanvas.width = Math.round(sw * scale);
+    uploadCanvas.height = Math.round(sh * scale);
+    uploadCtx.drawImage(source, 0, 0, uploadCanvas.width, uploadCanvas.height);
+    return uploadCanvas.toDataURL('image/jpeg', JPEG_QUALITY).split(',')[1];
+  }
+
+  async function requestDetections(imageBase64) {
+    let response;
+    try {
+      response = await fetch(GEMINI_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': apiKey
+        },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+          contents: [{
+            role: 'user',
+            parts: [
+              { inlineData: { mimeType: 'image/jpeg', data: imageBase64 } },
+              { text: USER_PROMPT }
+            ]
+          }],
+          generationConfig: {
+            responseMimeType: 'application/json',
+            responseSchema: RESPONSE_SCHEMA,
+            thinkingConfig: { thinkingLevel: 'low' }
+          }
+        })
+      });
+    } catch (err) {
+      throw await connectionFailure();
+    }
+
+    const body = await readJson(response);
+
+    if (!response.ok) throw errorFromResponse(response.status, body);
+    return parseDetections(body);
+  }
+
+  function errorFromResponse(status, body) {
+    const apiError = body && body.error ? body.error : {};
+    const details = Array.isArray(apiError.details) ? apiError.details : [];
+    const message = typeof apiError.message === 'string' ? apiError.message : `HTTP ${status}`;
+
+    if (status === 429) {
+      const retryInfo = details.find((d) => typeof d['@type'] === 'string' && d['@type'].endsWith('RetryInfo'));
+      const seconds = retryInfo ? parseFloat(retryInfo.retryDelay) : NaN;
+      return new ApiError('quota', Number.isFinite(seconds) ? Math.ceil(seconds * 1000) : QUOTA_WAIT_MS);
+    }
+    if (details.some((d) => d.reason === 'API_KEY_INVALID')) {
+      return new ApiError('key', 0, message);
+    }
+    if (status >= 500) {
+      return new ApiError('server', RETRY_AFTER_ERROR_MS);
+    }
+    return new ApiError('config', 0, message);
+  }
+
+  function parseDetections(body) {
+    const candidate = body && Array.isArray(body.candidates) ? body.candidates[0] : null;
+    const parts = candidate && candidate.content && Array.isArray(candidate.content.parts)
+      ? candidate.content.parts
+      : null;
+    if (!parts) throw new ApiError('bad-response', RETRY_AFTER_ERROR_MS);
+
+    const text = parts
+      .filter((p) => typeof p.text === 'string' && !p.thought)
+      .map((p) => p.text)
+      .join('');
+
+    let items;
+    try {
+      items = JSON.parse(text);
+    } catch (err) {
+      throw new ApiError('bad-response', RETRY_AFTER_ERROR_MS);
+    }
+    if (!Array.isArray(items)) throw new ApiError('bad-response', RETRY_AFTER_ERROR_MS);
+
+    return items.map(toDetection).filter((d) => d !== null);
+  }
+
+  // המרה מ-[ymin, xmin, ymax, xmax] בסקאלה 0-1000 לקואורדינטות יחסיות 0-1
+  function toDetection(item) {
+    if (!item || typeof item.label !== 'string' || !Array.isArray(item.box_2d) || item.box_2d.length !== 4) {
+      return null;
+    }
+    const [ymin, xmin, ymax, xmax] = item.box_2d.map((v) => Math.min(Math.max(Number(v), 0), 1000) / 1000);
+    if (![ymin, xmin, ymax, xmax].every(Number.isFinite) || xmax <= xmin || ymax <= ymin) return null;
+    const label = item.label.trim();
+    if (!label) return null;
+    return { label, x1: xmin, y1: ymin, x2: xmax, y2: ymax };
+  }
+
+  function handleApiError(err) {
+    if (!(err instanceof ApiError)) throw err;
+    if (err.kind === 'key' || err.kind === 'config' || err.kind === 'csp') {
+      fatalError = err;
+    } else {
+      transientError = err;
+      blockedUntil = Math.max(blockedUntil, Date.now() + err.retryAfterMs);
+    }
+    refreshStatus();
+  }
+
+  /* ================= שורת מצב ================= */
+  function showInfo(icon, text) {
+    statusEl.classList.remove('is-error');
+    statusEl.innerHTML = ICONS[icon];
+    const span = document.createElement('span');
+    span.textContent = text;
+    statusEl.appendChild(span);
+  }
+
+  function showError(text, detail) {
+    statusEl.classList.add('is-error');
+    statusEl.textContent = text;
+    if (detail) {
+      statusEl.appendChild(document.createElement('br'));
+      const bdi = document.createElement('bdi');
+      bdi.textContent = detail;
+      statusEl.appendChild(bdi);
+    }
+  }
+
+  function refreshStatus() {
+    if (fatalError) {
+      if (fatalError.kind === 'key') {
+        showError('מפתח ה-API של Gemini לא תקין. רעננו את הדף והחליפו אותו בהגדרות.');
+      } else if (fatalError.kind === 'csp') {
+        showError(CSP_TEXT);
+      } else {
+        showError('Gemini דחה את הבקשה:', fatalError.detail);
+      }
+      return;
+    }
+
+    if (transientError) {
+      const texts = {
+        quota: 'הגעתם למכסת השימוש החינמית של Gemini. הזיהוי ימשיך לבד כשהמכסה תתפנה.',
+        network: 'אין חיבור לאינטרנט. הזיהוי ימשיך לבד כשהחיבור יחזור.',
+        server: 'שירות Gemini עמוס כרגע. מנסה שוב…',
+        'bad-response': 'התקבלה תשובה לא תקינה מ-Gemini. מנסה שוב…'
+      };
+      showError(texts[transientError.kind]);
+      return;
+    }
+
+    if (frozen) {
+      if (frozenPending) {
+        showInfo('wait', 'מזהה…');
+      } else if (frozenDetections.length === 0) {
+        showInfo('empty', 'לא זוהו חפצים');
+      } else {
+        showInfo('hand', 'גע בחפץ');
+      }
+      return;
+    }
+
+    if (!hasLiveResult) {
+      showInfo('wait', 'מזהה…');
+      return;
+    }
+
+    statusEl.classList.remove('is-error');
+    statusEl.textContent = '';
+  }
+
+  /* ================= פתיחת מצלמה ================= */
+  function cameraErrorText(err) {
+    if (!window.isSecureContext || !navigator.mediaDevices) {
+      return 'המצלמה עובדת רק כשהדף פתוח בכתובת מאובטחת (https).';
+    }
+    switch (err && err.name) {
+      case 'NotAllowedError':
+      case 'SecurityError':
+        return 'אין הרשאה למצלמה. אשרו גישה למצלמה בהגדרות הדפדפן ונסו שוב.';
+      case 'NotFoundError':
+      case 'OverconstrainedError':
+        return 'לא נמצאה מצלמה במכשיר.';
+      case 'NotReadableError':
+        return 'המצלמה תפוסה על ידי אפליקציה אחרת. סגרו אותה ונסו שוב.';
+      default:
+        return 'לא הצלחנו לפתוח את המצלמה.';
+    }
+  }
+
+  async function openCamera() {
+    openBtn.disabled = true;
+    startMsg.textContent = '';
+
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: {
+          facingMode: { ideal: 'environment' },
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }
+      });
+    } catch (err) {
+      startMsg.textContent = cameraErrorText(err);
+      openBtn.disabled = false;
+      return;
+    }
+
+    video.srcObject = stream;
+    await video.play();
+    await document.fonts.load('700 28px Rubik');
+
+    startScreen.hidden = true;
+    cameraScreen.hidden = false;
+
+    new ResizeObserver(resizeCanvas).observe(viewWrap);
+    resizeCanvas();
+    requestAnimationFrame(renderLoop);
+
+    refreshStatus();
+    liveLoop();
+  }
+
+  /* ================= זיהוי חי ================= */
+  async function liveLoop() {
+    if (liveLoopRunning) return;
+    liveLoopRunning = true;
+    const isWanted = () => !frozen && !fatalError;
+
+    while (isWanted()) {
+      const got = await acquireSlot(REQUESTS_PER_MINUTE - FREEZE_RESERVE, isWanted);
+      if (!got) break;
+
+      const token = liveToken;
+      const startedAt = Date.now();
+      const image = encodeFrame(video, video.videoWidth, video.videoHeight);
+
+      try {
+        const detections = await requestDetections(image);
+        transientError = null;
+        if (token === liveToken) {
+          liveDetections = detections;
+          hasLiveResult = true;
+        }
+        refreshStatus();
+      } catch (err) {
+        handleApiError(err);
+      }
+
+      const nextAt = startedAt + LIVE_INTERVAL_MS;
+      while (isWanted() && Date.now() < nextAt) await sleep(250);
+    }
+
+    liveLoopRunning = false;
+  }
+
+  /* ================= זיהוי תמונה קפואה ================= */
+  async function detectFrozen(token) {
+    const isWanted = () => frozen && token === freezeToken && !fatalError;
+    const image = encodeFrame(frozenCanvas, frozenCanvas.width, frozenCanvas.height);
+
+    while (isWanted()) {
+      const got = await acquireSlot(REQUESTS_PER_MINUTE, isWanted);
+      if (!got) return;
+
+      try {
+        const detections = await requestDetections(image);
+        transientError = null;
+        if (!isWanted()) return;
+        frozenDetections = detections;
+        frozenPending = false;
+        selectedIndex = -1;
+        drawFrozen();
+        refreshStatus();
+        return;
+      } catch (err) {
+        handleApiError(err);
+      }
+    }
+  }
+
+  /* ================= קנבס ================= */
+  function resizeCanvas() {
+    const rect = viewWrap.getBoundingClientRect();
+    const dpr = window.devicePixelRatio;
+    view.width = Math.round(rect.width * dpr);
+    view.height = Math.round(rect.height * dpr);
+    if (frozen) drawFrozen();
+  }
+
+  function renderLoop() {
+    if (!frozen) {
+      draw(video, video.videoWidth, video.videoHeight, liveDetections, -1);
+    }
+    requestAnimationFrame(renderLoop);
+  }
+
+  function drawFrozen() {
+    draw(frozenCanvas, frozenCanvas.width, frozenCanvas.height, frozenDetections, selectedIndex);
+  }
+
+  function draw(source, sw, sh, detections, selected) {
+    const cw = view.width;
+    const ch = view.height;
+
+    ctx.fillStyle = COLORS.inkDeep;
+    ctx.fillRect(0, 0, cw, ch);
+    labelHits = [];
+    if (!sw || !sh) return;
+
+    const scale = Math.max(cw / sw, ch / sh);
+    const dw = sw * scale;
+    const dh = sh * scale;
+    const ox = (cw - dw) / 2;
+    const oy = (ch - dh) / 2;
+    mapping = { ox, oy, dw, dh };
+
+    ctx.drawImage(source, ox, oy, dw, dh);
+
+    const dpr = window.devicePixelRatio;
+    const baseFont = Math.round(Math.min(Math.max((cw / dpr) * 0.055, 20), 30) * dpr);
+
+    const order = detections.map((_, i) => i).filter((i) => i !== selected);
+    if (selected >= 0 && selected < detections.length) order.push(selected);
+
+    const boxes = [];
+    for (const i of order) {
+      const d = detections[i];
+      const x1 = Math.max(ox + d.x1 * dw, 0);
+      const y1 = Math.max(oy + d.y1 * dh, 0);
+      const x2 = Math.min(ox + d.x2 * dw, cw);
+      const y2 = Math.min(oy + d.y2 * dh, ch);
+      if (x2 <= x1 || y2 <= y1) continue;
+      boxes.push({ i, x1, y1, x2, y2 });
+    }
+
+    for (const b of boxes) drawBox(b, b.i === selected, dpr);
+    for (const b of boxes) drawTag(b, detections[b.i].label, b.i === selected, baseFont, cw, ch);
+  }
+
+  function drawBox(b, isSelected, dpr) {
+    const w = b.x2 - b.x1;
+    const h = b.y2 - b.y1;
+    const r = Math.min(14 * dpr, w / 4, h / 4);
+
+    ctx.beginPath();
+    ctx.roundRect(b.x1, b.y1, w, h, r);
+    if (isSelected) {
+      ctx.fillStyle = COLORS.selectedFill;
+      ctx.fill();
+    }
+    ctx.lineWidth = (isSelected ? 9 : 7) * dpr;
+    ctx.strokeStyle = COLORS.boxShadow;
+    ctx.stroke();
+    ctx.lineWidth = (isSelected ? 5 : 3) * dpr;
+    ctx.strokeStyle = isSelected ? COLORS.paper : COLORS.tag;
+    ctx.stroke();
+  }
+
+  function drawTag(b, text, isSelected, baseFont, cw, ch) {
+    const size = Math.round(isSelected ? baseFont * 1.4 : baseFont);
+
+    ctx.font = `700 ${size}px Rubik`;
+    ctx.direction = 'rtl';
+    const textW = ctx.measureText(text).width;
+
+    const padX = size * 0.5;
+    const padY = size * 0.32;
+    const holeR = size * 0.13;
+    const holeGap = size * 0.3;
+    const tagW = textW + padX * 2 + holeR * 2 + holeGap;
+    const tagH = size + padY * 2;
+    const radius = size * 0.28;
+
+    // בעברית התווית נצמדת לפינה הימנית-עליונה של החפץ
+    let x = b.x2 - tagW;
+    let y = b.y1 - tagH - size * 0.15;
+    if (y < 0) y = b.y1 + size * 0.15;
+    x = Math.min(Math.max(x, 0), cw - tagW);
+    y = Math.min(Math.max(y, 0), ch - tagH);
+
+    ctx.beginPath();
+    ctx.roundRect(x, y, tagW, tagH, radius);
+    ctx.fillStyle = isSelected ? COLORS.paper : COLORS.tag;
+    ctx.shadowColor = COLORS.boxShadow;
+    ctx.shadowBlur = size * 0.4;
+    ctx.shadowOffsetY = size * 0.08;
+    ctx.fill();
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetY = 0;
+
+    // חור התלייה של התווית
+    ctx.beginPath();
+    ctx.arc(x + tagW - padX * 0.7 - holeR, y + tagH / 2, holeR, 0, Math.PI * 2);
+    ctx.fillStyle = COLORS.ink;
+    ctx.fill();
+
+    ctx.fillStyle = COLORS.ink;
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, x + tagW - padX * 0.7 - holeR * 2 - holeGap, y + tagH / 2 + size * 0.04);
+
+    labelHits.push({ i: b.i, x, y, w: tagW, h: tagH });
+  }
+
+  /* ================= הקפאה ================= */
+  function updateFreezeUI() {
+    freezeLabel.textContent = frozen ? 'המשך' : 'הקפא';
+    iconPause.hidden = frozen;
+    iconPlay.hidden = !frozen;
+    viewWrap.classList.toggle('is-frozen', frozen);
+    refreshStatus();
+  }
+
+  function freeze() {
+    frozen = true;
+    freezeToken += 1;
+    liveToken += 1;
+    selectedIndex = -1;
+    frozenDetections = [];
+    frozenPending = true;
+
+    frozenCanvas.width = video.videoWidth;
+    frozenCanvas.height = video.videoHeight;
+    frozenCtx.drawImage(video, 0, 0);
+
+    updateFreezeUI();
+    drawFrozen();
+    detectFrozen(freezeToken);
+  }
+
+  function unfreeze() {
+    frozen = false;
+    freezeToken += 1;
+    liveToken += 1;
+    selectedIndex = -1;
+    frozenPending = false;
+    liveDetections = [];
+    hasLiveResult = false;
+    window.speechSynthesis.cancel();
+
+    updateFreezeUI();
+    liveLoop();
+  }
+
+  /* ================= נגיעה בחפץ ================= */
+  function handleTap(event) {
+    if (!frozen || frozenPending) return;
+
+    const rect = view.getBoundingClientRect();
+    const px = (event.clientX - rect.left) * (view.width / rect.width);
+    const py = (event.clientY - rect.top) * (view.height / rect.height);
+
+    let hit = -1;
+
+    for (let k = labelHits.length - 1; k >= 0; k--) {
+      const t = labelHits[k];
+      if (px >= t.x && px <= t.x + t.w && py >= t.y && py <= t.y + t.h) {
+        hit = t.i;
+        break;
+      }
+    }
+
+    if (hit < 0) {
+      const nx = (px - mapping.ox) / mapping.dw;
+      const ny = (py - mapping.oy) / mapping.dh;
+      let smallestArea = Infinity;
+      frozenDetections.forEach((d, i) => {
+        const area = (d.x2 - d.x1) * (d.y2 - d.y1);
+        if (nx >= d.x1 && nx <= d.x2 && ny >= d.y1 && ny <= d.y2 && area < smallestArea) {
+          smallestArea = area;
+          hit = i;
+        }
+      });
+    }
+
+    if (hit < 0) return;
+
+    selectedIndex = hit;
+    drawFrozen();
+    speak(frozenDetections[hit].label);
+  }
+
+  /* ================= הגדרת מפתח ================= */
+  function setMessage(el, text, detail) {
+    el.textContent = text;
+    if (detail) {
+      const bdi = document.createElement('bdi');
+      bdi.textContent = detail;
+      el.appendChild(bdi);
+    }
+  }
+
+  function showStartScreen() {
+    setupScreen.hidden = true;
+    startScreen.hidden = false;
+    openBtn.focus();
+  }
+
+  function showSetupScreen() {
+    startScreen.hidden = true;
+    setupScreen.hidden = false;
+    keyInput.value = '';
+    setMessage(setupMsg, '');
+    const hasKey = apiKey !== '';
+    savedKeyInfo.hidden = !hasKey;
+    if (hasKey) setMessage(savedKeyInfo, 'המפתח השמור מסתיים ב: ', apiKey.slice(-4));
+    backBtn.hidden = !hasKey;
+    deleteKeyBtn.hidden = !hasKey;
+    keyInput.focus();
+  }
+
+  async function saveKey() {
+    const key = keyInput.value.trim();
+    if (!key) {
+      setMessage(setupMsg, 'הדביקו את המפתח בשדה.');
+      return;
+    }
+
+    saveKeyBtn.disabled = true;
+    keyInput.disabled = true;
+    setMessage(setupMsg, 'בודק את המפתח…');
+
+    const error = await verifyKey(key);
+
+    saveKeyBtn.disabled = false;
+    keyInput.disabled = false;
+
+    if (error) {
+      const texts = {
+        key: 'המפתח לא תקין. בדקו שהעתקתם את כולו.',
+        csp: CSP_TEXT,
+        network: 'אין חיבור לאינטרנט. נסו שוב.',
+        server: 'שירות Gemini לא זמין כרגע. נסו שוב בעוד רגע.',
+        config: 'Google דחתה את המפתח:'
+      };
+      setMessage(setupMsg, texts[error.kind], error.kind === 'config' ? error.detail : '');
+      return;
+    }
+
+    try {
+      window.localStorage.setItem(STORAGE_KEY, key);
+    } catch (err) {
+      setMessage(setupMsg, 'הדפדפן חוסם שמירת נתונים באתר הזה, ולכן אי אפשר לשמור את המפתח.');
+      return;
+    }
+
+    apiKey = key;
+    showStartScreen();
+  }
+
+  function deleteKey() {
+    try {
+      window.localStorage.removeItem(STORAGE_KEY);
+    } catch (err) {
+      setMessage(setupMsg, 'הדפדפן חוסם גישה לנתונים השמורים באתר הזה.');
+      return;
+    }
+    apiKey = '';
+    showSetupScreen();
+  }
+
+  /* ================= אירועים ================= */
+  settingsBtn.addEventListener('click', showSetupScreen);
+  saveKeyBtn.addEventListener('click', saveKey);
+  keyInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') saveKey();
+  });
+  backBtn.addEventListener('click', showStartScreen);
+  deleteKeyBtn.addEventListener('click', deleteKey);
+
+  openBtn.addEventListener('click', openCamera);
+  freezeBtn.addEventListener('click', () => (frozen ? unfreeze() : freeze()));
+  view.addEventListener('click', handleTap);
+
+  try {
+    apiKey = window.localStorage.getItem(STORAGE_KEY) || '';
+  } catch (err) {
+    apiKey = '';
+  }
+
+  if (apiKey) {
+    startScreen.hidden = false;
+  } else {
+    showSetupScreen();
+  }
+})();
+</script>
+</body>
+</html>
