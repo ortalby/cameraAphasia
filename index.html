@@ -625,7 +625,18 @@
 
   .view-wrap video { object-fit: cover; }
 
-  .view-wrap canvas { touch-action: manipulation; }
+  .view-wrap canvas { touch-action: none; }
+
+  .zoom-controls {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .zoom-controls .overlay-btn { position: static; }
 
   .view-wrap.is-frozen canvas { cursor: pointer; }
 
@@ -1192,6 +1203,11 @@
       <div id="status" class="status" aria-live="polite"></div>
       <button id="closeCameraBtn" class="overlay-btn overlay-start" type="button" aria-label="סגירת המצלמה"><span data-icon="close"></span></button>
       <button id="switchCameraBtn" class="overlay-btn overlay-end" type="button" aria-label="החלפת מצלמה" hidden><span data-icon="switch"></span></button>
+      <div id="zoomControls" class="zoom-controls">
+        <button id="zoomInBtn" class="overlay-btn" type="button" aria-label="הגדלה"><span data-icon="plus"></span></button>
+        <button id="zoomOutBtn" class="overlay-btn" type="button" aria-label="הקטנה"><span data-icon="minus"></span></button>
+        <button id="zoomFitBtn" class="overlay-btn" type="button" aria-label="חזרה לתצוגה הרגילה"><span data-icon="fit"></span></button>
+      </div>
     </div>
     <div class="bar">
       <div id="barLive" class="bar-group">
@@ -1498,6 +1514,9 @@
     progress: '<path d="M4 20V11"/><path d="M10 20V5"/><path d="M16 20v-6"/><path d="M21 20H3"/>',
     settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1.03H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1.1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/>',
     close: '<path d="M6 6l12 12M18 6L6 18"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    minus: '<path d="M5 12h14"/>',
+    fit: '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
     back: '<path d="M9 5l7 7-7 7"/>',
     next: '<path d="M15 5l-7 7 7 7"/>',
     skip: '<path d="M12 5l-7 7 7 7"/><path d="M19 5l-7 7 7 7"/>',
@@ -2156,7 +2175,7 @@
       });
     });
     oneAtATimeBtn.setAttribute('aria-pressed', String(settings.oneAtATime));
-    layoutCache = { items: null, key: '', tags: null };
+    layoutCache = { key: '', tags: null };
     if (cameraActive && frozen) drawFrozen();
   }
 
@@ -2249,7 +2268,7 @@
   let cameraNotice = '';
   let whereScene = null;
   let whereToken = 0;
-  let layoutCache = { items: null, key: '', tags: null };
+  let layoutCache = { key: '', tags: null };
 
   /* ---------- שורת מצב ---------- */
   function showInfo(iconName, text) {
@@ -2350,6 +2369,9 @@
     fatalError = null;
     transientError = null;
     cameraNotice = '';
+    pointers.clear();
+    gesture = null;
+    resetView();
   }
 
   async function openCamera() {
@@ -2429,6 +2451,7 @@
     await video.play();
     switchCameraBtn.disabled = false;
     cameraNotice = '';
+    resetView();
 
     if (frozen) {
       unfreeze();
@@ -2534,13 +2557,232 @@
     }
   }
 
+  /* ---------- תצוגה: זום והזזה ---------- */
+  const MAX_ZOOM = 8;
+  const ZOOM_STEP = 1.6;
+  const VIEW_ANIMATION_MS = 350;
+  const TAP_SLOP = 10;
+  // חפץ שנבחר מוגדל עד שהוא ממלא בערך את החלק הזה של המסך
+  const FOCUS_WIDTH = 0.6;
+  const FOCUS_HEIGHT = 0.45;
+
+  const zoomControls = $('zoomControls');
+  const zoomInBtn = $('zoomInBtn');
+  const zoomOutBtn = $('zoomOutBtn');
+  const zoomFitBtn = $('zoomFitBtn');
+
+  let viewState = { z: 1, cx: 0.5, cy: 0.5 };
+  let viewAnimation = null;
+  let needsFrozenDraw = false;
+  const pointers = new Map();
+  let gesture = null;
+
+  function sourceSize() {
+    return frozen
+      ? { sw: frozenCanvas.width, sh: frozenCanvas.height }
+      : { sw: video.videoWidth, sh: video.videoHeight };
+  }
+
+  // זום 1 ממלא את המסך; אפשר להקטין עד שכל התמונה נראית
+  function minZoom(cw, ch, sw, sh) {
+    return Math.min(1, Math.min(cw / sw, ch / sh) / Math.max(cw / sw, ch / sh));
+  }
+
+  function mappingFor(state, cw, ch, sw, sh) {
+    const base = Math.max(cw / sw, ch / sh);
+    const dw = sw * base * state.z;
+    const dh = sh * base * state.z;
+    const ox = dw >= cw ? Math.min(0, Math.max(cw - dw, cw / 2 - state.cx * dw)) : (cw - dw) / 2;
+    const oy = dh >= ch ? Math.min(0, Math.max(ch - dh, ch / 2 - state.cy * dh)) : (ch - dh) / 2;
+    return { ox, oy, dw, dh, base };
+  }
+
+  function clampState(state) {
+    const { sw, sh } = sourceSize();
+    const cw = view.width;
+    const ch = view.height;
+    const z = Math.min(MAX_ZOOM, Math.max(minZoom(cw, ch, sw, sh), state.z));
+    const m = mappingFor({ z, cx: state.cx, cy: state.cy }, cw, ch, sw, sh);
+    return { z, cx: (cw / 2 - m.ox) / m.dw, cy: (ch / 2 - m.oy) / m.dh };
+  }
+
+  function updateZoomButtons() {
+    const { sw, sh } = sourceSize();
+    if (!sw || !sh) return;
+    const min = minZoom(view.width, view.height, sw, sh);
+    zoomInBtn.disabled = viewState.z >= MAX_ZOOM - 0.01;
+    zoomOutBtn.disabled = viewState.z <= min + 0.01;
+    zoomFitBtn.disabled = Math.abs(viewState.z - 1) < 0.01 &&
+      Math.abs(viewState.cx - 0.5) < 0.005 && Math.abs(viewState.cy - 0.5) < 0.005;
+  }
+
+  function setView(state) {
+    viewState = clampState(state);
+    needsFrozenDraw = true;
+    updateZoomButtons();
+  }
+
+  function resetView() {
+    viewAnimation = null;
+    viewState = { z: 1, cx: 0.5, cy: 0.5 };
+    needsFrozenDraw = true;
+    updateZoomButtons();
+  }
+
+  function animateView(target) {
+    const to = clampState(target);
+    if (reducedMotion.matches) {
+      viewAnimation = null;
+      setView(to);
+      return;
+    }
+    viewAnimation = { from: { ...viewState }, to, start: performance.now() };
+  }
+
+  function stepViewAnimation(now) {
+    if (!viewAnimation) return false;
+    const t = Math.min(1, (now - viewAnimation.start) / VIEW_ANIMATION_MS);
+    const e = 1 - Math.pow(1 - t, 3);
+    const { from, to } = viewAnimation;
+    viewState = {
+      z: from.z * Math.pow(to.z / from.z, e),
+      cx: from.cx + (to.cx - from.cx) * e,
+      cy: from.cy + (to.cy - from.cy) * e
+    };
+    if (t >= 1) {
+      viewAnimation = null;
+      updateZoomButtons();
+    }
+    return true;
+  }
+
+  function zoomAround(px, py, zoom) {
+    const { sw, sh } = sourceSize();
+    const cw = view.width;
+    const ch = view.height;
+    const m = mappingFor(viewState, cw, ch, sw, sh);
+    const ax = (px - m.ox) / m.dw;
+    const ay = (py - m.oy) / m.dh;
+    const z = Math.min(MAX_ZOOM, Math.max(minZoom(cw, ch, sw, sh), zoom));
+    const dw = sw * m.base * z;
+    const dh = sh * m.base * z;
+    setView({ z, cx: (cw / 2 - (px - ax * dw)) / dw, cy: (ch / 2 - (py - ay * dh)) / dh });
+  }
+
+  // מביא חפץ למרכז המסך ומגדיל אותו
+  function focusDetection(d) {
+    const { sw, sh } = sourceSize();
+    const base = Math.max(view.width / sw, view.height / sh);
+    const fit = Math.min(
+      (view.width * FOCUS_WIDTH) / ((d.x2 - d.x1) * sw * base),
+      (view.height * FOCUS_HEIGHT) / ((d.y2 - d.y1) * sh * base)
+    );
+    animateView({ z: Math.max(1, fit), cx: (d.x1 + d.x2) / 2, cy: (d.y1 + d.y2) / 2 });
+  }
+
+  function canvasPoint(event) {
+    const rect = view.getBoundingClientRect();
+    return {
+      x: (event.clientX - rect.left) * (view.width / rect.width),
+      y: (event.clientY - rect.top) * (view.height / rect.height)
+    };
+  }
+
+  function beginPan(point) {
+    const { sw, sh } = sourceSize();
+    const m = mappingFor(viewState, view.width, view.height, sw, sh);
+    gesture = { type: 'pan', start: point, ox: m.ox, oy: m.oy, dw: m.dw, dh: m.dh };
+  }
+
+  function beginPinch() {
+    const [a, b] = [...pointers.values()];
+    const { sw, sh } = sourceSize();
+    const m = mappingFor(viewState, view.width, view.height, sw, sh);
+    const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+    gesture = {
+      type: 'pinch',
+      startDistance: Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)),
+      startZoom: viewState.z,
+      base: m.base,
+      anchor: { x: (mid.x - m.ox) / m.dw, y: (mid.y - m.oy) / m.dh }
+    };
+  }
+
+  function onPointerDown(event) {
+    if (!cameraActive || !sourceSize().sw) return;
+    view.setPointerCapture(event.pointerId);
+    const point = canvasPoint(event);
+    pointers.set(event.pointerId, point);
+    viewAnimation = null;
+    if (pointers.size === 1) gesture = { type: 'tap', start: point };
+    else if (pointers.size === 2) beginPinch();
+  }
+
+  function onPointerMove(event) {
+    if (!pointers.has(event.pointerId) || !gesture) return;
+    const point = canvasPoint(event);
+    pointers.set(event.pointerId, point);
+
+    if (gesture.type === 'tap') {
+      if (Math.hypot(point.x - gesture.start.x, point.y - gesture.start.y) < TAP_SLOP * window.devicePixelRatio) return;
+      beginPan(gesture.start);
+    }
+
+    const { sw, sh } = sourceSize();
+    const cw = view.width;
+    const ch = view.height;
+
+    if (gesture.type === 'pan') {
+      const ox = gesture.ox + (point.x - gesture.start.x);
+      const oy = gesture.oy + (point.y - gesture.start.y);
+      setView({ z: viewState.z, cx: (cw / 2 - ox) / gesture.dw, cy: (ch / 2 - oy) / gesture.dh });
+    } else if (gesture.type === 'pinch' && pointers.size >= 2) {
+      const [a, b] = [...pointers.values()];
+      const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+      const distance = Math.hypot(a.x - b.x, a.y - b.y);
+      const z = Math.min(MAX_ZOOM, Math.max(minZoom(cw, ch, sw, sh), (gesture.startZoom * distance) / gesture.startDistance));
+      const dw = sw * gesture.base * z;
+      const dh = sh * gesture.base * z;
+      setView({
+        z,
+        cx: (cw / 2 - (mid.x - gesture.anchor.x * dw)) / dw,
+        cy: (ch / 2 - (mid.y - gesture.anchor.y * dh)) / dh
+      });
+    }
+  }
+
+  function onPointerEnd(event) {
+    if (!pointers.has(event.pointerId)) return;
+    pointers.delete(event.pointerId);
+
+    if (gesture && gesture.type === 'tap' && event.type === 'pointerup' && pointers.size === 0) {
+      handleTap(canvasPoint(event));
+    }
+
+    if (pointers.size === 1 && gesture && gesture.type === 'pinch') {
+      beginPan([...pointers.values()][0]);
+    } else if (pointers.size === 0) {
+      gesture = null;
+    }
+  }
+
+  function onWheel(event) {
+    if (!cameraActive || !sourceSize().sw) return;
+    event.preventDefault();
+    viewAnimation = null;
+    const point = canvasPoint(event);
+    zoomAround(point.x, point.y, viewState.z * Math.exp(-event.deltaY * 0.002));
+  }
+
   /* ---------- ציור ---------- */
   function resizeCanvas() {
     const rect = viewWrap.getBoundingClientRect();
     const dpr = window.devicePixelRatio;
     view.width = Math.max(1, Math.round(rect.width * dpr));
     view.height = Math.max(1, Math.round(rect.height * dpr));
-    if (cameraActive && frozen) drawFrozen();
+    if (!cameraActive || !sourceSize().sw) return;
+    setView(viewState);
+    if (frozen) drawFrozen();
   }
 
   new ResizeObserver(() => {
@@ -2549,6 +2791,8 @@
 
   function renderLoop(now) {
     if (!cameraActive) return;
+    const viewMoving = stepViewAnimation(now);
+
     if (!frozen) {
       const animating = !reducedMotion.matches &&
         liveDetections.some((d) => d.from && now - d.arrivedAt < BOX_ANIMATION_MS);
@@ -2563,11 +2807,15 @@
           if (rect && liveDetections[b.i]) liveDetections[b.i].prevTag = { dx: rect.x - b.x2, dy: rect.y - b.y1 };
         }
       }
+    } else if (viewMoving || needsFrozenDraw) {
+      drawFrozen();
     }
+
     rafId = requestAnimationFrame(renderLoop);
   }
 
   function drawFrozen() {
+    needsFrozenDraw = false;
     draw(frozenCanvas, frozenCanvas.width, frozenCanvas.height, frozenDetections, selectedIndex, {
       labels: whereScene || settings.oneAtATime ? 'selected' : 'all',
       selectedStyle,
@@ -2584,13 +2832,8 @@
     labelHits = [];
     if (!sw || !sh) return null;
 
-    const scale = Math.max(cw / sw, ch / sh);
-    const dw = sw * scale;
-    const dh = sh * scale;
-    const ox = (cw - dw) / 2;
-    const oy = (ch - dh) / 2;
+    const { ox, oy, dw, dh } = mappingFor(viewState, cw, ch, sw, sh);
     mapping = { ox, oy, dw, dh };
-
     ctx.drawImage(source, ox, oy, dw, dh);
 
     const dpr = window.devicePixelRatio;
@@ -2617,9 +2860,13 @@
 
     const others = boxes.filter((b) => b.i !== selected);
     for (const b of others) drawBox(b, BOX_STYLES.normal, dpr);
-    if (showAll) {
-      for (const b of others) drawLeader(b, tags.get(b.i), BOX_STYLES.normal, dpr);
-      for (const b of others) drawTag(tags.get(b.i), items[b.i].label, BOX_STYLES.normal, b.i);
+    for (const b of others) {
+      const rect = tags.get(b.i);
+      if (rect) drawLeader(b, rect, BOX_STYLES.normal, dpr);
+    }
+    for (const b of others) {
+      const rect = tags.get(b.i);
+      if (rect) drawTag(rect, items[b.i].label, BOX_STYLES.normal, b.i);
     }
 
     const chosen = boxes.find((b) => b.i === selected);
@@ -2638,7 +2885,7 @@
 
       drawBox(chosen, style, dpr);
       const tag = measureTag(items[chosen.i].label, Math.round(baseFont * 1.4));
-      const rect = bestTagRect(chosen, tag, boxes, [], obstacles, cw, ch, SELECTED_LAYOUT_WEIGHTS);
+      const rect = bestTagRect(chosen, tag, boxes, [], obstacles, cw, ch, SELECTED_LAYOUT_WEIGHTS, false);
       drawLeader(chosen, rect, style, dpr);
       drawTag(rect, items[chosen.i].label, style, chosen.i);
     }
@@ -2647,9 +2894,9 @@
   }
 
   /* ---------- פריסת כיתובים ---------- */
-  const LAYOUT_WEIGHTS = { otherObject: 10, distance: 0.6, stability: 0.5 };
+  const LAYOUT_WEIGHTS = { ownObject: 20, otherObject: 8, distance: 0.8, stability: 0.6 };
   // לכיתוב של החפץ שנבחר: שאר החפצים מעומעמים, ולכן עדיף שהכיתוב יישאר צמוד לחפץ
-  const SELECTED_LAYOUT_WEIGHTS = { otherObject: 4, distance: 2, stability: 0 };
+  const SELECTED_LAYOUT_WEIGHTS = { ownObject: 20, otherObject: 3, distance: 2, stability: 0 };
 
   function rectOverlap(a, b) {
     const w = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
@@ -2663,12 +2910,16 @@
     return Math.hypot(dx, dy);
   }
 
+  function padRect(r, pad) {
+    return { x: r.x - pad, y: r.y - pad, w: r.w + pad * 2, h: r.h + pad * 2 };
+  }
+
   function overlayObstacles() {
     const vr = view.getBoundingClientRect();
     if (vr.width === 0) return [];
     const sx = view.width / vr.width;
     const sy = view.height / vr.height;
-    return [statusEl, closeCameraBtn, switchCameraBtn]
+    return [statusEl, closeCameraBtn, switchCameraBtn, zoomControls]
       .map((el) => el.getBoundingClientRect())
       .filter((r) => r.width > 0 && r.height > 0)
       .map((r) => ({ x: (r.left - vr.left) * sx, y: (r.top - vr.top) * sy, w: r.width * sx, h: r.height * sy }));
@@ -2681,58 +2932,72 @@
     return { size, w: textW + size * 1.56, h: size * 1.64 };
   }
 
-  // מיקומים אפשריים לכיתוב: מעל, מתחת ולצדי החפץ, בכמה מרחקים, ובסוף גם בתוך הפינות שלו
+  function spread(from, to, count) {
+    if (Math.abs(to - from) < 1) return [from];
+    return Array.from({ length: count }, (_, i) => from + ((to - from) * i) / (count - 1));
+  }
+
+  // מיקומים אפשריים לכיתוב: טבעות סביב החפץ במרחקים הולכים וגדלים (מעל, מתחת ומשני הצדדים), ובסוף גם בתוך החפץ
   function tagCandidates(b, w, h, gap) {
     const list = [];
-    const cx = (b.x1 + b.x2) / 2;
-    const cy = (b.y1 + b.y2) / 2;
     const step = h + gap;
-    for (let k = 0; k < 4; k++) {
+    for (let k = 0; k < 6; k++) {
       const off = gap + k * step;
-      for (const y of [b.y1 - h - off, b.y2 + off]) {
-        list.push({ x: b.x2 - w, y }, { x: cx - w / 2, y }, { x: b.x1, y });
-      }
-      for (const x of [b.x2 + off, b.x1 - w - off]) {
-        list.push({ x, y: b.y1 }, { x, y: cy - h / 2 }, { x, y: b.y2 - h });
-      }
+      const left = b.x1 - off;
+      const top = b.y1 - off;
+      const right = b.x2 + off;
+      const bottom = b.y2 + off;
+      const xs = spread(right - w, left, 5);
+      const ys = spread(top, bottom - h, 5);
+      for (const x of xs) list.push({ x, y: top - h });
+      for (const x of xs) list.push({ x, y: bottom });
+      for (const y of ys) list.push({ x: right, y }, { x: left - w, y });
     }
-    list.push(
-      { x: b.x2 - w - gap, y: b.y1 + gap },
-      { x: b.x1 + gap, y: b.y1 + gap },
-      { x: b.x2 - w - gap, y: b.y2 - h - gap },
-      { x: b.x1 + gap, y: b.y2 - h - gap }
-    );
+    for (const y of spread(b.y1 + gap, b.y2 - h - gap, 3)) {
+      for (const x of spread(b.x2 - w - gap, b.x1 + gap, 3)) list.push({ x, y });
+    }
     return list;
   }
 
-  // המחיר של כל מיקום: כיסוי כיתובים אחרים (הכי יקר), כיסוי חפצים לפי החלק מהם שמכוסה, מרחק מהחפץ ושינוי מהמיקום הקודם
-  function bestTagRect(box, tag, boxes, placed, obstacles, cw, ch, weights) {
+  // strict: הכיתוב חייב להיות כולו בתוך המסך, בלי לגעת בכיתובים אחרים ובכפתורים.
+  // בתוך האפשרויות האלה נבחר המיקום שמסתיר הכי מעט חפצים, קרוב לחפץ ויציב בין עדכונים.
+  function bestTagRect(box, tag, boxes, placed, obstacles, cw, ch, weights, strict) {
     const gap = tag.size * 0.25;
-    const margin = tag.size * 0.2;
+    const margin = tag.size * 0.15;
     const tagArea = tag.w * tag.h;
     const candidates = tagCandidates(box, tag.w, tag.h, gap);
-    const previous = box.prevTag && weights.stability ? { x: box.x2 + box.prevTag.dx, y: box.y1 + box.prevTag.dy } : null;
+    const previous = box.prevTag && weights.stability
+      ? { x: box.x2 + box.prevTag.dx, y: box.y1 + box.prevTag.dy }
+      : null;
     if (previous) candidates.unshift(previous);
 
     let best = null;
     let bestCost = Infinity;
     for (const c of candidates) {
-      const r = {
-        x: Math.max(margin, Math.min(c.x, cw - tag.w - margin)),
-        y: Math.max(margin, Math.min(c.y, ch - tag.h - margin)),
-        w: tag.w,
-        h: tag.h,
-        size: tag.size
-      };
+      let x = c.x;
+      let y = c.y;
+      if (strict) {
+        if (x < margin || y < margin || x + tag.w > cw - margin || y + tag.h > ch - margin) continue;
+      } else {
+        x = Math.max(margin, Math.min(x, cw - tag.w - margin));
+        y = Math.max(margin, Math.min(y, ch - tag.h - margin));
+      }
+      const r = { x, y, w: tag.w, h: tag.h, size: tag.size };
 
       let cost = 0;
-      for (const p of placed) cost += 100 * rectOverlap(r, p) / tagArea;
-      for (const o of obstacles) cost += 100 * rectOverlap(r, o) / tagArea;
-      for (const b of boxes) {
-        cost += (b.i === box.i ? 20 : weights.otherObject) * rectOverlap(r, b) / (b.w * b.h);
+      if (strict) {
+        const spaced = padRect(r, gap * 0.5);
+        if (placed.some((p) => rectOverlap(spaced, p) > 0)) continue;
+        if (obstacles.some((o) => rectOverlap(r, o) > 0)) continue;
+      } else {
+        for (const o of obstacles) cost += (100 * rectOverlap(r, o)) / tagArea;
       }
-      cost += weights.distance * rectGap(r, box) / tag.h;
-      if (previous) cost += weights.stability * Math.hypot(r.x - previous.x, r.y - previous.y) / tag.h;
+
+      for (const b of boxes) {
+        cost += ((b.i === box.i ? weights.ownObject : weights.otherObject) * rectOverlap(r, b)) / (b.w * b.h);
+      }
+      cost += (weights.distance * rectGap(r, box)) / tag.h;
+      if (previous) cost += (weights.stability * Math.hypot(r.x - previous.x, r.y - previous.y)) / tag.h;
 
       if (cost < bestCost) {
         bestCost = cost;
@@ -2742,23 +3007,26 @@
     return best;
   }
 
+  // כיתוב שאין לו מקום פנוי לא מוצג; אחרי הגדלה או נגיעה בחפץ הוא מופיע
   function layoutTags(items, boxes, baseFont, obstacles, cw, ch) {
-    const key = [cw, ch, baseFont, boxes.map((b) => b.i).join(',')]
+    const key = [cw, ch, baseFont]
+      .concat(boxes.map((b) => `${b.i}:${items[b.i].label}:${Math.round(b.x1)},${Math.round(b.y1)},${Math.round(b.x2)},${Math.round(b.y2)}`))
       .concat(obstacles.map((o) => `${Math.round(o.x)},${Math.round(o.y)},${Math.round(o.w)},${Math.round(o.h)}`))
       .join('|');
-    if (layoutCache.items === items && layoutCache.key === key) return layoutCache.tags;
+    if (layoutCache.key === key) return layoutCache.tags;
 
     // חפצים קטנים מקבלים מקום ראשונים, כי כיתוב שמכסה אותם מסתיר אותם לגמרי
     const order = boxes.slice().sort((a, b) => a.w * a.h - b.w * b.h);
     const placed = [];
     const tags = new Map();
     for (const b of order) {
-      const rect = bestTagRect(b, measureTag(items[b.i].label, baseFont), boxes, placed, obstacles, cw, ch, LAYOUT_WEIGHTS);
+      const rect = bestTagRect(b, measureTag(items[b.i].label, baseFont), boxes, placed, obstacles, cw, ch, LAYOUT_WEIGHTS, true);
+      if (!rect) continue;
       placed.push(rect);
       tags.set(b.i, rect);
     }
 
-    layoutCache = { items, key, tags };
+    layoutCache = { key, tags };
     return tags;
   }
 
@@ -2896,10 +3164,9 @@
   }
 
   /* ---------- נגיעה בחפץ ---------- */
-  function hitTest(event) {
-    const rect = view.getBoundingClientRect();
-    const px = (event.clientX - rect.left) * (view.width / rect.width);
-    const py = (event.clientY - rect.top) * (view.height / rect.height);
+  function hitTest(point) {
+    const px = point.x;
+    const py = point.y;
 
     for (let k = labelHits.length - 1; k >= 0; k--) {
       const t = labelHits[k];
@@ -2920,9 +3187,9 @@
     return hit;
   }
 
-  function handleTap(event) {
+  function handleTap(point) {
     if (!frozen || frozenPending) return;
-    const hit = hitTest(event);
+    const hit = hitTest(point);
     if (whereScene) {
       handleWhereSceneTap(hit);
       return;
@@ -2932,6 +3199,7 @@
     selectedStyle = 'focus';
     updateFrozenTools();
     drawFrozen();
+    focusDetection(frozenDetections[hit]);
     speak(frozenDetections[hit].label);
   }
 
@@ -3017,6 +3285,7 @@
       drawFrozen();
       whereFeedback.classList.add('is-good');
       setMessage(whereFeedback, 'נכון!');
+      focusDetection(d);
       speak(whereScene.details.niqqud);
       finishWhereScene(whereScene.wrongTaps === 0 ? 'first-try' : 'after-retry');
     } else {
@@ -3041,6 +3310,7 @@
     selectedIndex = best;
     selectedStyle = 'focus';
     drawFrozen();
+    focusDetection(frozenDetections[best]);
     whereFeedback.classList.remove('is-good');
     setMessage(whereFeedback, 'הנה זה.');
     speak(whereScene.details.niqqud);
@@ -3088,7 +3358,14 @@
   whereShowBtn.addEventListener('click', showWhereSceneAnswer);
   whereNextBtn.addEventListener('click', nextWhereScene);
   $('whereEndBtn').addEventListener('click', endWhereScene);
-  view.addEventListener('click', handleTap);
+  view.addEventListener('pointerdown', onPointerDown);
+  view.addEventListener('pointermove', onPointerMove);
+  view.addEventListener('pointerup', onPointerEnd);
+  view.addEventListener('pointercancel', onPointerEnd);
+  view.addEventListener('wheel', onWheel, { passive: false });
+  zoomInBtn.addEventListener('click', () => animateView({ ...viewState, z: viewState.z * ZOOM_STEP }));
+  zoomOutBtn.addEventListener('click', () => animateView({ ...viewState, z: viewState.z / ZOOM_STEP }));
+  zoomFitBtn.addEventListener('click', () => animateView({ z: 1, cx: 0.5, cy: 0.5 }));
 
   /* ================= כרטיס מילה ================= */
   const wordSheet = $('wordSheet');
